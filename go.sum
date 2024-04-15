@@ -1,3 +1,5 @@
+github.com/GopherJ/gnark-ignition-verifier v0.0.0-20240415111943-ecb54c32e4bb h1:stZGm4c/Pn9yda+rhWKQl81EGgrIUuKf72to476JqFc=
+github.com/GopherJ/gnark-ignition-verifier v0.0.0-20240415111943-ecb54c32e4bb/go.mod h1:5OGlD6B9ePz0Vf3JHK0/f9SYTmvumOSEQh16KgYa+KE=
 github.com/bits-and-blooms/bitset v1.8.0 h1:FD+XqgOZDUxxZ8hzoBFuV9+cGWY9CslN6d5MS5JVb4c=
 github.com/bits-and-blooms/bitset v1.8.0/go.mod h1:7hO7Gc7Pp1vODcmWvKMRA9BNmbv6a/7QIWpPxHddWR8=
 github.com/blang/semver/v4 v4.0.0 h1:1PFHFE6yCCTv8C1TeyNNarDzntLi7wMI5i/pzqYIsAM=

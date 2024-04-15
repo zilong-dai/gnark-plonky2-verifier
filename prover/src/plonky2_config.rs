@@ -147,10 +147,10 @@ impl<F: RichField> Hasher<F> for PoseidonBLS12381Hash {
 
         state[0] = Fr::ZERO;
         for rate_chunk in input.chunks(RATE * 3) {
-            for (j, bn128_chunk) in rate_chunk.chunks(3).enumerate() {
-                let mut bytes = bn128_chunk[0].to_canonical_u64().to_le_bytes().to_vec();
+            for (j, bls12381chunk) in rate_chunk.chunks(3).enumerate() {
+                let mut bytes = bls12381chunk[0].to_canonical_u64().to_le_bytes().to_vec();
 
-                for gl_element in bn128_chunk.iter().skip(1) {
+                for gl_element in bls12381chunk.iter().skip(1) {
                     let chunk_bytes = gl_element.to_canonical_u64().to_le_bytes();
                     bytes.extend_from_slice(&chunk_bytes);
                 }

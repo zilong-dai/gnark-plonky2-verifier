@@ -40,7 +40,7 @@ func TestPoseidonWitness(t *testing.T) {
 	testCase := func(in [12]frontend.Variable, out [12]frontend.Variable) {
 		circuit := TestPoseidonCircuit{In: in, Out: out}
 		witness := TestPoseidonCircuit{In: in, Out: out}
-		err := test.IsSolved(&circuit, &witness, ecc.BN254.ScalarField())
+		err := test.IsSolved(&circuit, &witness, ecc.BLS12_381.ScalarField())
 		assert.NoError(err)
 	}
 
@@ -74,12 +74,12 @@ func TestPoseidonProof(t *testing.T) {
 	circuit := TestPoseidonCircuit{In: in, Out: out}
 	assignment := TestPoseidonCircuit{In: in, Out: out}
 
-	r1cs, err := frontend.Compile(ecc.BN254.ScalarField(), r1cs.NewBuilder, &circuit)
+	r1cs, err := frontend.Compile(ecc.BLS12_381.ScalarField(), r1cs.NewBuilder, &circuit)
 	if err != nil {
 		panic(err)
 	}
 
-	witness, err := frontend.NewWitness(&assignment, ecc.BN254.ScalarField())
+	witness, err := frontend.NewWitness(&assignment, ecc.BLS12_381.ScalarField())
 	if err != nil {
 		panic(err)
 	}
@@ -89,7 +89,7 @@ func TestPoseidonProof(t *testing.T) {
 		panic(err)
 	}
 
-	err = test.IsSolved(&circuit, &assignment, ecc.BN254.ScalarField())
+	err = test.IsSolved(&circuit, &assignment, ecc.BLS12_381.ScalarField())
 	if err != nil {
 		panic(err)
 	}

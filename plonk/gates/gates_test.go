@@ -715,7 +715,7 @@ func TestGates(t *testing.T) {
 	testCase := func(testGate gates.Gate, expectedConstraints []gl.QuadraticExtensionVariable) {
 		circuit := &TestGateCircuit{testGate: testGate, ExpectedConstraints: expectedConstraints}
 		witness := &TestGateCircuit{testGate: testGate, ExpectedConstraints: expectedConstraints}
-		err := test.IsSolved(circuit, witness, ecc.BN254.ScalarField())
+		err := test.IsSolved(circuit, witness, ecc.BLS12_381.ScalarField())
 		assert.NoError(err)
 	}
 

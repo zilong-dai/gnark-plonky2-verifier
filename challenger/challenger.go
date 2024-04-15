@@ -14,7 +14,7 @@ import (
 type Chip struct {
 	api               frontend.API `gnark:"-"`
 	poseidonChip      *poseidon.GoldilocksChip
-	poseidonBN254Chip *poseidon.BN254Chip
+	poseidonBLS12381Chip *poseidon.BLS12381Chip
 	spongeState       poseidon.GoldilocksState
 	inputBuffer       []gl.Variable
 	outputBuffer      []gl.Variable
@@ -28,11 +28,11 @@ func NewChip(api frontend.API) *Chip {
 		spongeState[i] = gl.Zero()
 	}
 	poseidonChip := poseidon.NewGoldilocksChip(api)
-	poseidonBN254Chip := poseidon.NewBN254Chip(api)
+	poseidonBLS12381Chip := poseidon.NewBLS12381Chip(api)
 	return &Chip{
 		api:               api,
 		poseidonChip:      poseidonChip,
-		poseidonBN254Chip: poseidonBN254Chip,
+		poseidonBLS12381Chip: poseidonBLS12381Chip,
 		spongeState:       spongeState,
 		inputBuffer:       inputBuffer,
 		outputBuffer:      outputBuffer,
@@ -59,14 +59,14 @@ func (c *Chip) ObserveHash(hash poseidon.GoldilocksHashOut) {
 	c.ObserveElements(elements)
 }
 
-func (c *Chip) ObserveBN254Hash(hash poseidon.BN254HashOut) {
-	elements := c.poseidonBN254Chip.ToVec(hash)
+func (c *Chip) ObserveBLS12381Hash(hash poseidon.BLS12381HashOut) {
+	elements := c.poseidonBLS12381Chip.ToVec(hash)
 	c.ObserveElements(elements)
 }
 
-func (c *Chip) ObserveCap(cap []poseidon.BN254HashOut) {
+func (c *Chip) ObserveCap(cap []poseidon.BLS12381HashOut) {
 	for i := 0; i < len(cap); i++ {
-		c.ObserveBN254Hash(cap[i])
+		c.ObserveBLS12381Hash(cap[i])
 	}
 }
 

@@ -15,7 +15,7 @@ type VerifierChip struct {
 	api               frontend.API             `gnark:"-"`
 	glChip            *gl.Chip                 `gnark:"-"`
 	poseidonGlChip    *poseidon.GoldilocksChip `gnark:"-"`
-	poseidonBN254Chip *poseidon.BN254Chip      `gnark:"-"`
+	poseidonBLS12381Chip *poseidon.BLS12381Chip      `gnark:"-"`
 	plonkChip         *plonk.PlonkChip         `gnark:"-"`
 	friChip           *fri.Chip                `gnark:"-"`
 	commonData        types.CommonCircuitData  `gnark:"-"`
@@ -26,12 +26,12 @@ func NewVerifierChip(api frontend.API, commonCircuitData types.CommonCircuitData
 	friChip := fri.NewChip(api, &commonCircuitData, &commonCircuitData.FriParams)
 	plonkChip := plonk.NewPlonkChip(api, commonCircuitData)
 	poseidonGlChip := poseidon.NewGoldilocksChip(api)
-	poseidonBN254Chip := poseidon.NewBN254Chip(api)
+	poseidonBLS12381Chip := poseidon.NewBLS12381Chip(api)
 	return &VerifierChip{
 		api:               api,
 		glChip:            glChip,
 		poseidonGlChip:    poseidonGlChip,
-		poseidonBN254Chip: poseidonBN254Chip,
+		poseidonBLS12381Chip: poseidonBLS12381Chip,
 		plonkChip:         plonkChip,
 		friChip:           friChip,
 		commonData:        commonCircuitData,
@@ -53,7 +53,7 @@ func (c *VerifierChip) GetChallenges(
 
 	var circuitDigest = verifierData.CircuitDigest
 
-	challenger.ObserveBN254Hash(circuitDigest)
+	challenger.ObserveBLS12381Hash(circuitDigest)
 	challenger.ObserveHash(publicInputsHash)
 	challenger.ObserveCap(proof.WiresCap)
 	plonkBetas := challenger.GetNChallenges(numChallenges)

@@ -34,7 +34,7 @@ func TestStepVerifier(t *testing.T) {
 			CommonCircuitData:       commonCircuitData,
 		}
 
-		err := test.IsSolved(&circuit, &witness, ecc.BN254.ScalarField())
+		err := test.IsSolved(&circuit, &witness, ecc.BLS12_381.ScalarField())
 		assert.NoError(err)
 	}
 	testCase()

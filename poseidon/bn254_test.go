@@ -9,16 +9,16 @@ import (
 	gl "github.com/succinctlabs/gnark-plonky2-verifier/goldilocks"
 )
 
-type TestPoseidonBN254Circuit struct {
-	In  [BN254_SPONGE_WIDTH]frontend.Variable
-	Out [BN254_SPONGE_WIDTH]frontend.Variable
+type TestPoseidonBLS12381Circuit struct {
+	In  [BLS12381_SPONGE_WIDTH]frontend.Variable
+	Out [BLS12381_SPONGE_WIDTH]frontend.Variable
 }
 
-func (circuit *TestPoseidonBN254Circuit) Define(api frontend.API) error {
-	poseidonChip := NewBN254Chip(api)
+func (circuit *TestPoseidonBLS12381Circuit) Define(api frontend.API) error {
+	poseidonChip := NewBLS12381Chip(api)
 	output := poseidonChip.Poseidon(circuit.In)
 
-	for i := 0; i < BN254_SPONGE_WIDTH; i++ {
+	for i := 0; i < BLS12381_SPONGE_WIDTH; i++ {
 		api.AssertIsEqual(
 			output[i],
 			circuit.Out[i],
@@ -28,13 +28,13 @@ func (circuit *TestPoseidonBN254Circuit) Define(api frontend.API) error {
 	return nil
 }
 
-func TestPoseidonBN254(t *testing.T) {
+func TestPoseidonBLS12381(t *testing.T) {
 	assert := test.NewAssert(t)
 
-	testCaseFn := func(in [BN254_SPONGE_WIDTH]frontend.Variable, out [BN254_SPONGE_WIDTH]frontend.Variable) {
-		circuit := TestPoseidonBN254Circuit{In: in, Out: out}
-		witness := TestPoseidonBN254Circuit{In: in, Out: out}
-		err := test.IsSolved(&circuit, &witness, ecc.BN254.ScalarField())
+	testCaseFn := func(in [BLS12381_SPONGE_WIDTH]frontend.Variable, out [BLS12381_SPONGE_WIDTH]frontend.Variable) {
+		circuit := TestPoseidonBLS12381Circuit{In: in, Out: out}
+		witness := TestPoseidonBLS12381Circuit{In: in, Out: out}
+		err := test.IsSolved(&circuit, &witness, ecc.BLS12_381.ScalarField())
 		assert.NoError(err)
 	}
 
@@ -88,8 +88,8 @@ func TestPoseidonBN254(t *testing.T) {
 	}
 
 	for _, testCase := range testCases {
-		var in [BN254_SPONGE_WIDTH]frontend.Variable
-		var out [BN254_SPONGE_WIDTH]frontend.Variable
+		var in [BLS12381_SPONGE_WIDTH]frontend.Variable
+		var out [BLS12381_SPONGE_WIDTH]frontend.Variable
 		copy(in[:], gl.StrArrayToFrontendVariableArray(testCase[0]))
 		copy(out[:], gl.StrArrayToFrontendVariableArray(testCase[1]))
 		testCaseFn(in, out)

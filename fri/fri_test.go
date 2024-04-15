@@ -30,7 +30,7 @@ func (circuit *TestFriCircuit) Define(api frontend.API) error {
 	friChip := fri.NewChip(api, &commonCircuitData, &commonCircuitData.FriParams)
 	challengerChip := challenger.NewChip(api)
 
-	challengerChip.ObserveBN254Hash(verifierOnlyCircuitData.CircuitDigest)
+	challengerChip.ObserveBLS12381Hash(verifierOnlyCircuitData.CircuitDigest)
 	challengerChip.ObserveHash(poseidonChip.HashNoPad(proofWithPis.PublicInputs))
 	challengerChip.ObserveCap(proofWithPis.Proof.WiresCap)
 	plonkBetas := challengerChip.GetNChallenges(commonCircuitData.Config.NumChallenges) // For plonk betas
@@ -125,7 +125,7 @@ func TestDecodeBlockFriVerification(t *testing.T) {
 			verifierOnlyCircuitData,
 			commonCircuitData,
 		}
-		err := test.IsSolved(&circuit, &witness, ecc.BN254.ScalarField())
+		err := test.IsSolved(&circuit, &witness, ecc.BLS12_381.ScalarField())
 		assert.NoError(err)
 	}
 

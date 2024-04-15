@@ -5,10 +5,11 @@ use plonky2::iop::witness::WitnessWrite;
 use plonky2::plonk::circuit_builder::CircuitBuilder;
 use plonky2::plonk::circuit_data::CircuitConfig;
 use plonky2::plonk::config::PoseidonGoldilocksConfig;
-use plonky2x::backend::circuit::Groth16WrapperParameters;
 use plonky2x::backend::wrapper::wrap::WrappedCircuit;
 use plonky2x::frontend::builder::CircuitBuilder as WrapperBuilder;
 use plonky2x::prelude::DefaultParameters;
+
+use crate::parameters::Groth16WrapperParameters;
 
 pub mod parameters;
 

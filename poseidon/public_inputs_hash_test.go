@@ -10,7 +10,7 @@ import (
 	gl "github.com/succinctlabs/gnark-plonky2-verifier/goldilocks"
 )
 
-var testCurve = ecc.BN254
+var testCurve = ecc.BLS12_381
 
 type TestPublicInputsHashCircuit struct {
 	In  [3]frontend.Variable
@@ -20,7 +20,7 @@ type TestPublicInputsHashCircuit struct {
 func (circuit *TestPublicInputsHashCircuit) Define(api frontend.API) error {
 	glAPI := gl.New(api)
 
-	// BN254 -> Binary(64) -> F
+	// BLS12381 -> Binary(64) -> F
 	var input [3]gl.Variable
 	for i := 0; i < 3; i++ {
 		input[i] = gl.NewVariable(api.FromBinary(api.ToBinary(circuit.In[i], 64)...))
@@ -76,7 +76,7 @@ func TestPublicInputsHashWitness2(t *testing.T) {
 		&circuit,
 		&witness,
 		test.WithBackends(backend.GROTH16),
-		test.WithCurves(ecc.BN254),
+		test.WithCurves(ecc.BLS12_381),
 		test.NoFuzzing(),
 		test.NoSerializationChecks(),
 	)

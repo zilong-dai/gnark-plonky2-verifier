@@ -58,7 +58,7 @@ func TestPlonkDecodeBlock(t *testing.T) {
 			verifierOnlyCircuitData,
 			commonCircuitData,
 		}
-		err := test.IsSolved(&circuit, &witness, ecc.BN254.ScalarField())
+		err := test.IsSolved(&circuit, &witness, ecc.BLS12_381.ScalarField())
 		assert.NoError(err)
 	}
 

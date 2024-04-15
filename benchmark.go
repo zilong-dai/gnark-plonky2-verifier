@@ -52,7 +52,7 @@ func runBenchmark(plonky2Circuit string, proofSystem string, profileCircuit bool
 		os.Exit(1)
 	}
 
-	r1cs, err := frontend.Compile(ecc.BN254.ScalarField(), builder, &circuit)
+	r1cs, err := frontend.Compile(ecc.BLS12_381.ScalarField(), builder, &circuit)
 	if err != nil {
 		fmt.Println("error in building circuit", err)
 		os.Exit(1)
@@ -80,7 +80,7 @@ func runBenchmark(plonky2Circuit string, proofSystem string, profileCircuit bool
 func plonkProof(r1cs constraint.ConstraintSystem, circuitName string, dummy bool, saveArtifacts bool) {
 	var pk plonk.ProvingKey
 	var vk plonk.VerifyingKey
-	var srs kzg.SRS = kzg.NewSRS(ecc.BN254)
+	var srs kzg.SRS = kzg.NewSRS(ecc.BLS12_381)
 	var err error
 
 	proofWithPis := variables.DeserializeProofWithPublicInputs(types.ReadProofWithPublicInputs("testdata/" + circuitName + "/proof_with_public_inputs.json"))
@@ -150,7 +150,7 @@ func plonkProof(r1cs constraint.ConstraintSystem, circuitName string, dummy bool
 	}
 
 	fmt.Println("Generating witness", time.Now())
-	witness, _ := frontend.NewWitness(&assignment, ecc.BN254.ScalarField())
+	witness, _ := frontend.NewWitness(&assignment, ecc.BLS12_381.ScalarField())
 	publicWitness, _ := witness.Public()
 	if saveArtifacts {
 		fWitness, _ := os.Create("witness")
@@ -237,7 +237,7 @@ func groth16Proof(r1cs constraint.ConstraintSystem, circuitName string, dummy bo
 	}
 
 	fmt.Println("Generating witness", time.Now())
-	witness, _ := frontend.NewWitness(&assignment, ecc.BN254.ScalarField())
+	witness, _ := frontend.NewWitness(&assignment, ecc.BLS12_381.ScalarField())
 	publicWitness, _ := witness.Public()
 	if saveArtifacts {
 		fWitness, _ := os.Create("witness")
