@@ -1,0 +1,73 @@
+use plonky2::field::goldilocks_field::GoldilocksField;
+use plonky2::field::types::Field;
+use plonky2::iop::witness::PartialWitness;
+use plonky2::iop::witness::WitnessWrite;
+use plonky2::plonk::circuit_builder::CircuitBuilder;
+use plonky2::plonk::circuit_data::CircuitConfig;
+use plonky2::plonk::config::PoseidonGoldilocksConfig;
+use plonky2x::backend::circuit::Groth16WrapperParameters;
+use plonky2x::backend::wrapper::wrap::WrappedCircuit;
+use plonky2x::frontend::builder::CircuitBuilder as WrapperBuilder;
+use plonky2x::prelude::DefaultParameters;
+
+pub mod parameters;
+
+pub mod fr;
+pub mod logger;
+pub mod plonky2_config;
+pub mod poseidon_bls12_381;
+pub mod poseidon_bls12_381_constants;
+
+fn main() -> anyhow::Result<()> {
+    logger::setup_logger();
+    // config defines number of wires of gates, FRI strategies etc.
+    let config = CircuitConfig::standard_recursion_config();
+
+    // We use GoldilocksField as circuit arithmetization
+    type F = GoldilocksField;
+
+    // We use Poseidon hash on GoldilocksField as FRI hasher
+    type C = PoseidonGoldilocksConfig;
+
+    // We use the degree D extension Field when soundness is required.
+    const D: usize = 2;
+
+    tracing::info!("prove that the prover knows x such that x^2 - 2x + 1 = 0");
+    let mut builder = CircuitBuilder::<F, D>::new(config.clone());
+
+    let x_t = builder.add_virtual_target();
+    let minus_x_t = builder.neg(x_t);
+    let minus_2x_t = builder.mul_const(F::from_canonical_u64(2), minus_x_t);
+    let x2_t = builder.exp_u64(x_t, 2);
+    let one_t = builder.one();
+    let zero_t = builder.zero();
+    let poly_t = builder.add_many(&[x2_t, minus_2x_t, one_t]);
+    builder.connect(poly_t, zero_t); // x^2 - 2x + 1 = 0
+
+    tracing::info!("compiling circuits...");
+    let data = builder.build::<C>();
+    let mut pw = PartialWitness::<F>::new();
+    tracing::info!("setting witness...");
+    pw.set_target(x_t, GoldilocksField(1)); // set x = 1
+
+    tracing::info!("proving...");
+    let proof = data.prove(pw)?;
+    tracing::info!("verifying...");
+    data.verify(proof.clone())?;
+    tracing::info!("done!");
+
+    tracing::info!("compiling wrapping circuits...");
+    let wrapper_builder = WrapperBuilder::<DefaultParameters, D>::new();
+    let mut circuit = wrapper_builder.build();
+    circuit.data = data;
+    let wrapped_circuit =
+        WrappedCircuit::<DefaultParameters, Groth16WrapperParameters, D>::build(circuit);
+    tracing::info!("proving...");
+    let wrapped_proof = wrapped_circuit.prove(&proof)?;
+    tracing::info!("saving...");
+    wrapped_proof.save("../testdata")?;
+    tracing::info!("done!");
+
+    tracing::info!("go to ../verifier directory and run go test .");
+    Ok(())
+}
