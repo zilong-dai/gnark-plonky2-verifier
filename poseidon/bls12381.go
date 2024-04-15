@@ -12,7 +12,7 @@ import (
 
 	"github.com/consensys/gnark-crypto/ecc/bls12-381"
 	"github.com/consensys/gnark/frontend"
-	gl "github.com/succinctlabs/gnark-plonky2-verifier/goldilocks"
+	gl "github.com/cf/gnark-plonky2-verifier/goldilocks"
 )
 
 const BLS12381_FULL_ROUNDS int = 8
