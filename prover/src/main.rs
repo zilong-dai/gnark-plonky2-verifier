@@ -44,6 +44,14 @@ fn main() -> anyhow::Result<()> {
     let zero_t = builder.zero();
     let poly_t = builder.add_many(&[x2_t, minus_2x_t, one_t]);
     builder.connect(poly_t, zero_t); // x^2 - 2x + 1 = 0
+    builder.register_public_input(x_t);
+    builder.register_public_input(x_t);
+    builder.register_public_input(x_t);
+    builder.register_public_input(x_t);
+    builder.register_public_input(x_t);
+    builder.register_public_input(x_t);
+    builder.register_public_input(x_t);
+    builder.register_public_input(x_t);
 
     tracing::info!("compiling circuits...");
     let data = builder.build::<C>();

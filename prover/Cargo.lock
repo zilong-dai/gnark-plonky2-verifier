@@ -2723,7 +2723,7 @@ source = "git+https://github.com/mir-protocol/plonky2#53c5bc3e956379875bad7e4f37
 [[package]]
 name = "plonky2x"
 version = "0.1.0"
-source = "git+https://github.com/GopherJ/succinctx.git?branch=feat/two-public-inputs-hack#b45699e6db1cbb7fd86606aad4b3d0ecaa3e4e59"
+source = "git+https://github.com/GopherJ/succinctx.git?branch=feat/use-inner-pi#bd0a7ebb6aa69564f72aa2c6ac9093773b14c8e3"
 dependencies = [
  "anyhow",
  "array-macro",
@@ -2765,7 +2765,7 @@ dependencies = [
 [[package]]
 name = "plonky2x-derive"
 version = "0.1.0"
-source = "git+https://github.com/GopherJ/succinctx.git?branch=feat/two-public-inputs-hack#b45699e6db1cbb7fd86606aad4b3d0ecaa3e4e59"
+source = "git+https://github.com/GopherJ/succinctx.git?branch=feat/use-inner-pi#bd0a7ebb6aa69564f72aa2c6ac9093773b14c8e3"
 dependencies = [
  "proc-macro2",
  "quote",
