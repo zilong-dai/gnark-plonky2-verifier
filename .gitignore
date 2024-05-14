@@ -25,3 +25,4 @@ data/
 
 **/target/
 ffi/Cargo.lock
+**/libg16verifier*

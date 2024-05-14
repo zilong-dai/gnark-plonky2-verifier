@@ -12,6 +12,7 @@ use plonky2::hash::hash_types::RichField;
 use plonky2::hash::poseidon::PoseidonHash;
 use plonky2::hash::poseidon::PoseidonPermutation;
 use plonky2::plonk::config::GenericConfig;
+use plonky2::plonk::config::GenericConfigStandardMerkleHasher;
 use plonky2::plonk::config::GenericHashOut;
 use plonky2::plonk::config::Hasher;
 use serde::de::Visitor;
@@ -34,6 +35,7 @@ impl GenericConfig<2> for PoseidonBLS12381GoldilocksConfig {
     type FE = QuadraticExtension<Self::F>;
     type Hasher = PoseidonBLS12381Hash;
     type InnerHasher = PoseidonHash;
+    type MerkleHasher = GenericConfigStandardMerkleHasher<Self::F, Self::Hasher>;
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]

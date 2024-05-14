@@ -1,4 +1,4 @@
-package cmd
+package worker
 
 import (
 	"bytes"
@@ -15,6 +15,7 @@ import (
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/frontend/cs/r1cs"
 )
+
 
 type CRVerifierCircuit struct {
 	PublicInputs            []frontend.Variable               `gnark:",public"`
@@ -36,9 +37,6 @@ func (c *CRVerifierCircuit) Define(api frontend.API) error {
 		panic("invalid original public inputs, should contain 8 goldilocks elements")
 	}
 
-	// two_to_32 := new(big.Int).SetInt64(1 << 32)
-	// two_to_31 := new(big.Int).SetInt64(1 << 31)
-	// two_to_63 := new(big.Int).Mul(two_to_31, two_to_32)
 	two_to_63 := new(big.Int).SetUint64(1 << 63)
 
 	blockStateHashAcc := frontend.Variable(0)
@@ -65,7 +63,6 @@ func initKeyStorePath() {
 			os.MkdirAll(KEY_STORE_PATH, os.ModePerm)
 		}
 	}
-
 }
 
 func GenerateProof(common_circuit_data string, proof_with_public_inputs string, verifier_only_circuit_data string) string {
@@ -77,9 +74,6 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 	rawProofWithPis := types.ReadProofWithPublicInputsRaw(proof_with_public_inputs)
 	proofWithPis := variables.DeserializeProofWithPublicInputs(rawProofWithPis)
 
-	// two_to_32 := new(big.Int).SetInt64(1 << 32)
-	// two_to_31 := new(big.Int).SetInt64(1 << 31)
-	// two_to_63 := new(big.Int).Mul(two_to_31, two_to_32)
 	two_to_63 := new(big.Int).SetUint64(1 << 63)
 
 	blockStateHashAcc := big.NewInt(0)
@@ -133,15 +127,6 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 	if err := WriteProvingKey(pk, KEY_STORE_PATH+PK_PATH); err != nil {
 		panic(err)
 	}
-
-	// pk, err := ReadProvingKey(CURVE_ID, KEY_STORE_PATH+PK_PATH)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// vk, err := ReadVerifyingKey(CURVE_ID, KEY_STORE_PATH+VK_PATH)
-	// if err != nil {
-	// 	panic(err)
-	// }
 
 	proof, err := groth16.Prove(cs, pk, witness)
 	if err != nil {
