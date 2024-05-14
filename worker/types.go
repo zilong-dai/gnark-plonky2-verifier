@@ -7,6 +7,7 @@ import (
 
 	"github.com/consensys/gnark-crypto/ecc"
 	curve "github.com/consensys/gnark-crypto/ecc/bls12-381"
+	"github.com/consensys/gnark/backend/groth16"
 	bls12381 "github.com/consensys/gnark/backend/groth16/bls12-381"
 	"github.com/consensys/gnark/backend/witness"
 )
@@ -21,7 +22,7 @@ var PROOF_PATH string = "proof_groth16.bin"
 var WITNESS_PATH string = "witness_groth16.bin"
 
 type G16ProofWithPublicInputs struct {
-	Proof        bls12381.Proof
+	Proof        groth16.Proof
 	PublicInputs witness.Witness
 }
 
@@ -42,7 +43,7 @@ func Chunk(str string, chunk int) []string {
 
 func (p G16ProofWithPublicInputs) MarshalJSON() ([]byte, error) {
 
-	proof := p.Proof
+	proof := p.Proof.(*bls12381.Proof)
 
 	var buf [48 * 2]byte
 	var writer bytes.Buffer
@@ -78,11 +79,11 @@ func (p G16ProofWithPublicInputs) MarshalJSON() ([]byte, error) {
 
 }
 
-func NewG16ProofWithPublicInputs(curveId ecc.ID) *G16ProofWithPublicInputs {
+func NewG16ProofWithPublicInputs() *G16ProofWithPublicInputs {
 
-	var proof bls12381.Proof
+	proof := groth16.NewProof(CURVE_ID)
 
-	publicInputs, err := witness.New(curveId.ScalarField())
+	publicInputs, err := witness.New(CURVE_ID.ScalarField())
 	if err != nil {
 		panic(err)
 	}
@@ -95,7 +96,7 @@ func NewG16ProofWithPublicInputs(curveId ecc.ID) *G16ProofWithPublicInputs {
 }
 
 func (p *G16ProofWithPublicInputs) UnmarshalJSON(data []byte) error {
-
+	proof := p.Proof.(*bls12381.Proof)
 	var ProofString struct {
 		PiA           [2]string    `json:"pi_a"`
 		PiB           [2][2]string `json:"pi_b"`
@@ -114,7 +115,7 @@ func (p *G16ProofWithPublicInputs) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	err = p.Proof.Ar.Unmarshal(pia_bytes)
+	err = proof.Ar.Unmarshal(pia_bytes)
 	if err != nil {
 		return err
 	}
@@ -123,7 +124,7 @@ func (p *G16ProofWithPublicInputs) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	err = p.Proof.Bs.Unmarshal(pib_bytes)
+	err = proof.Bs.Unmarshal(pib_bytes)
 	if err != nil {
 		return err
 	}
@@ -132,7 +133,7 @@ func (p *G16ProofWithPublicInputs) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	err = p.Proof.Krs.Unmarshal(pic_bytes)
+	err = proof.Krs.Unmarshal(pic_bytes)
 	if err != nil {
 		return err
 	}
@@ -142,9 +143,9 @@ func (p *G16ProofWithPublicInputs) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	len := len(com_bytes) / 96
-	p.Proof.Commitments = make([]curve.G1Affine, len)
+	proof.Commitments = make([]curve.G1Affine, len)
 	for i := 0; i < len; i++ {
-		err = p.Proof.Commitments[i].Unmarshal(com_bytes[96*i : 96*(i+1)])
+		err = proof.Commitments[i].Unmarshal(com_bytes[96*i : 96*(i+1)])
 		if err != nil {
 			return err
 		}
@@ -154,7 +155,7 @@ func (p *G16ProofWithPublicInputs) UnmarshalJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	err = p.Proof.CommitmentPok.Unmarshal(compok_bytes)
+	err = proof.CommitmentPok.Unmarshal(compok_bytes)
 	if err != nil {
 		return err
 	}
@@ -169,6 +170,173 @@ func (p *G16ProofWithPublicInputs) UnmarshalJSON(data []byte) error {
 	reader := bytes.NewReader(publicinputs_bytes)
 
 	if _, err = p.PublicInputs.ReadFrom(reader); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type G16VerifyingKey struct {
+	VK groth16.VerifyingKey
+}
+
+func NewG16VerifyingKey() *G16VerifyingKey {
+	vk := groth16.NewVerifyingKey(CURVE_ID)
+	return &G16VerifyingKey{
+		VK: vk,
+	}
+}
+
+// type VerifyingKey struct {
+// 	// [α]₁, [Kvk]₁
+// 	G1 struct {
+// 		Alpha       curve.G1Affine
+// 		Beta, Delta curve.G1Affine   // unused, here for compatibility purposes
+// 		K           []curve.G1Affine // The indexes correspond to the public wires
+// 	}
+
+// 	// [β]₂, [δ]₂, [γ]₂,
+// 	// -[δ]₂, -[γ]₂: see proof.Verify() for more details
+// 	G2 struct {
+// 		Beta, Delta, Gamma curve.G2Affine
+// 		deltaNeg, gammaNeg curve.G2Affine // not serialized
+// 	}
+
+// 	// e(α, β)
+// 	e curve.GT // not serialized
+
+// 	CommitmentKey                pedersen.VerifyingKey
+// 	PublicAndCommitmentCommitted [][]int // indexes of public/commitment committed variables
+// }
+
+// pub struct VerifyingKey<E: Pairing> {
+//     pub alpha_g1: E::G1Affine,
+//     pub beta_g2: E::G2Affine,
+//     pub gamma_g2: E::G2Affine,
+//     pub delta_g2: E::G2Affine,
+//     pub gamma_abc_g1: Vec<E::G1Affine>,
+// }
+
+func (gvk G16VerifyingKey) MarshalJSON() ([]byte, error) {
+	vk := gvk.VK.(*bls12381.VerifyingKey)
+	var buf [48 * 2]byte
+
+	gamma_abc_g1_arr := make([][]string, len(vk.G1.K))
+	for i := 0; i < len(vk.G1.K); i++ {
+		gamma_abc_g1_arr[i] = make([]string, 2)
+	}
+	for i := 0; i < len(vk.G1.K); i++ {
+		buf = vk.G1.K[i].RawBytes()
+		gamma_abc_g1_arr[i][0] = hex.EncodeToString(buf[:])[0:96]
+		gamma_abc_g1_arr[i][1] = hex.EncodeToString(buf[:])[96:192]
+	}
+
+	var comkey_writer bytes.Buffer
+
+	vk.CommitmentKey.WriteRawTo(&comkey_writer)
+
+	alpha_g1_arr := Chunk(hex.EncodeToString((&vk.G1.Alpha).Marshal()), 2)
+	beta_g2_arr := Chunk(hex.EncodeToString((&vk.G2.Beta).Marshal()), 4)
+	gamma_g2_arr := Chunk(hex.EncodeToString((&vk.G2.Gamma).Marshal()), 4)
+	delta_g2_arr := Chunk(hex.EncodeToString((&vk.G2.Delta).Marshal()), 4)
+	CommitmentKey := hex.EncodeToString(comkey_writer.Bytes())
+
+	vk_map := map[string]interface{}{
+		"alpha_g1":      [2]string{alpha_g1_arr[0], alpha_g1_arr[1]},
+		"beta_g2":       [2][2]string{{beta_g2_arr[0], beta_g2_arr[1]}, {beta_g2_arr[2], beta_g2_arr[3]}},
+		"gamma_g2":      [2][2]string{{gamma_g2_arr[0], gamma_g2_arr[1]}, {gamma_g2_arr[2], gamma_g2_arr[3]}},
+		"delta_g2":      [2][2]string{{delta_g2_arr[0], delta_g2_arr[1]}, {delta_g2_arr[2], delta_g2_arr[3]}},
+		"gamma_abc_g1":  gamma_abc_g1_arr,
+		"CommitmentKey": CommitmentKey,
+		// "CommitmentKeyG": hex.EncodeToString((&vk.CommitmentKey.g).Marshal()),
+		// "CommitmentKeyGRoot": hex.EncodeToString((&vk.CommitmentKey.gRootSigmaNeg).Marshal()),
+		"PublicAndCommitmentCommitted": vk.PublicAndCommitmentCommitted,
+	}
+
+	return json.Marshal(vk_map)
+}
+
+func (gvk *G16VerifyingKey) UnmarshalJSON(data []byte) error {
+	vk := gvk.VK.(*bls12381.VerifyingKey)
+	var VerifyingKeyString struct {
+		Alpha         [2]string    `json:"alpha_g1"`
+		K             [][]string   `json:"gamma_abc_g1"`
+		Beta          [2][2]string `json:"beta_g2"`
+		Gamma         [2][2]string `json:"gamma_g2"`
+		Delta         [2][2]string `json:"delta_g2"`
+		CommitmentKey string       `json:"CommitmentKey"`
+		// CommitmentKeyG string
+		// CommitmentKeyGRoot string
+		PublicAndCommitmentCommitted [][]int `json:"PublicAndCommitmentCommitted"`
+	}
+
+	err := json.Unmarshal(data, &VerifyingKeyString)
+	if err != nil {
+		return err
+	}
+
+	alpha_bytes, err := hex.DecodeString(VerifyingKeyString.Alpha[0] + VerifyingKeyString.Alpha[1])
+	if err != nil {
+		return err
+	}
+	err = vk.G1.Alpha.Unmarshal(alpha_bytes)
+	if err != nil {
+		return err
+	}
+
+	len := len(VerifyingKeyString.K)
+	vk.G1.K = make([]curve.G1Affine, len)
+	for i := 0; i < len; i++ {
+		k_bytes, err := hex.DecodeString(VerifyingKeyString.K[i][0] + VerifyingKeyString.K[i][1])
+		if err != nil {
+			return err
+		}
+		err = vk.G1.K[i].Unmarshal(k_bytes)
+		if err != nil {
+			return err
+		}
+	}
+
+	beta_bytes, err := hex.DecodeString(VerifyingKeyString.Beta[0][0] + VerifyingKeyString.Beta[0][1] + VerifyingKeyString.Beta[1][0] + VerifyingKeyString.Beta[1][1])
+	if err != nil {
+		return err
+	}
+	err = vk.G2.Beta.Unmarshal(beta_bytes)
+	if err != nil {
+		return err
+	}
+
+	gamma_bytes, err := hex.DecodeString(VerifyingKeyString.Gamma[0][0] + VerifyingKeyString.Gamma[0][1] + VerifyingKeyString.Gamma[1][0] + VerifyingKeyString.Gamma[1][1])
+	if err != nil {
+		return err
+	}
+	err = vk.G2.Gamma.Unmarshal(gamma_bytes)
+	if err != nil {
+		return err
+	}
+
+	delta_bytes, err := hex.DecodeString(VerifyingKeyString.Delta[0][0] + VerifyingKeyString.Delta[0][1] + VerifyingKeyString.Delta[1][0] + VerifyingKeyString.Delta[1][1])
+	if err != nil {
+		return err
+	}
+	err = vk.G2.Delta.Unmarshal(delta_bytes)
+	if err != nil {
+		return err
+	}
+
+	comkey_bytes, err := hex.DecodeString(VerifyingKeyString.CommitmentKey)
+	if err != nil {
+		return err
+	}
+	_, err = vk.CommitmentKey.ReadFrom(bytes.NewReader(comkey_bytes))
+	if err != nil {
+		return err
+	}
+
+	vk.PublicAndCommitmentCommitted = VerifyingKeyString.PublicAndCommitmentCommitted
+
+	err = vk.Precompute()
+	if err != nil {
 		return err
 	}
 
