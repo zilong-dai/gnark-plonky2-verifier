@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"bytes"
 	"encoding/json"
 	"math/big"
 	"os"
@@ -11,7 +10,6 @@ import (
 	"github.com/cf/gnark-plonky2-verifier/variables"
 	"github.com/cf/gnark-plonky2-verifier/verifier"
 	"github.com/consensys/gnark/backend/groth16"
-	bls12381 "github.com/consensys/gnark/backend/groth16/bls12-381"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/frontend/cs/r1cs"
 )
@@ -162,18 +160,8 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 		panic(err)
 	}
 
-	var buffer bytes.Buffer
-	if _, err := proof.WriteRawTo(&buffer); err != nil {
-		panic(err)
-	}
-
-	var blsproof bls12381.Proof
-	if _, err := blsproof.ReadFrom(&buffer); err != nil {
-		panic(err)
-	}
-
 	var g16ProofWithPublicInputs = G16ProofWithPublicInputs{
-		Proof:        blsproof,
+		Proof:        proof,
 		PublicInputs: publicWitness,
 	}
 
@@ -187,7 +175,7 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 }
 
 func VerifyProof(proofString string) string {
-	g16ProofWithPublicInputs := NewG16ProofWithPublicInputs(CURVE_ID)
+	g16ProofWithPublicInputs := NewG16ProofWithPublicInputs()
 
 	if err := json.Unmarshal([]byte(proofString), g16ProofWithPublicInputs); err != nil {
 		panic(err)
@@ -198,7 +186,7 @@ func VerifyProof(proofString string) string {
 		panic(err)
 	}
 
-	if err := groth16.Verify(&g16ProofWithPublicInputs.Proof, vk, g16ProofWithPublicInputs.PublicInputs); err != nil {
+	if err := groth16.Verify(g16ProofWithPublicInputs.Proof, vk, g16ProofWithPublicInputs.PublicInputs); err != nil {
 		return "false"
 	}
 	return "true"
