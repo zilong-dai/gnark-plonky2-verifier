@@ -1,0 +1,26 @@
+use std::process::Command;
+
+fn main() {
+    println!(r"cargo:rustc-link-search=target/debug");
+
+    let os = Command::new("uname").output().unwrap();
+    let ext = match String::from_utf8_lossy(os.stdout.as_slice())
+        .into_owned()
+        .trim_end()
+        .as_ref()
+    {
+        "Darwin" => "dylib",
+        _ => "so",
+    };
+    Command::new("go")
+        .current_dir("../cmd")
+        .args(&[
+            "build",
+            "-o",
+            &format!("../ffi/target/debug/libg16verifier.{}", ext),
+            "-buildmode=c-shared",
+            "main.go",
+        ])
+        .status()
+        .unwrap();
+}

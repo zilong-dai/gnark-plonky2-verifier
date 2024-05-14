@@ -22,3 +22,6 @@ verifier.png
 
 # Output from aztec ignition
 data/
+
+**/target/
+ffi/Cargo.lock
