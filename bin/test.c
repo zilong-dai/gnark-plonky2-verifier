@@ -1,0 +1,11 @@
+#include <stdio.h>
+#include <pthread.h>
+
+extern char * GenerateGroth16Proof(char * common_circuit_data , char *proof_with_public_inputs , char *verifier_only_circuit_data);
+extern char * VerifyGroth16Proof(char * proofString );
+
+
+int main() {
+    char *proofString= "{\"CommitmentPok\":\"0454ff012453799bbb528413a3bc595703894817f13ae79a2a15d05aa8ff32e2c559cced54adbab30ca8b329e3845d6002a6ef927c44a055b0fe3839a27f4ac3f157613b45226dba964c39c36febac66a1cf74bd6494dacfa5311bf79e16be6e\",\"Commitments\":\"0d7c3e861392a2e53dc9ce21984721ef9272cf1814360260d258012ffe05114eb69b7a3ba384e8e17d2688df8841a7440a3dedf24b386a094765029f0c86ebef7f6b688e247cbc0266b7d2f5bb5673ad9a13a87b104a98a5c1b1c9719a9d97af\",\"pi_a\":[\"17bbe4d2dab78d37c05d7e777c3e3eced4a21f1c8bf2cf2f15588bf7158380333ea69f89b2b6db728acaf3271dec7504\",\"13d4d0093c7ebe8ed85dc56e5e5e9cb4ed5566b401cdfdd5eaaa864b2fe256ee92198e863379895adf0b10e111cb66ff\"],\"pi_b\":[[\"15c0b348d844908edb5dc6c7b439aedc920e3b68c9a531d6e429eb7929463b8e79bdfe5cf82d20a64b7a24b42f34dd40\",\"18a74617aa48836983337f573714ad7607e9cdaf63ec62f5b1b9eccf5b271449b496d00e09980cfbd80f71d86f903a87\"],[\"0470cf5e41f215a7b98668b44f406552ab2861fba7d187c39f3e9e8c0d38b7f0f1df42e24cb9e5df5cd24c09de35470d\",\"055c50955eddabd4da22243eec0d2cc4f108b9c0201b86031a010d936e0d3525e3af31e5bd104175441b082d2c5f7a07\"]],\"pi_c\":[\"0d454a60998070bc92d68887ec4f0de652e28a069f61d3aed99be16ed451ecad2e8590c1d36a761ca2a9bd64d428768a\",\"07fc87fe81843905bcb3c8d3e7bf34b7ef32a480226f39568ccd8f839ba9371c129b0748fff35d8767950b156ebddf6b\"],\"public_iniputs\":[\"07a76bdb1bacc994bdf46c7540c734b8ca17c063731e47a1aaa2c1bce2d1e067\",\"19738b05d9758d49a8fd66b8606bfa7c1d0b7f58be3276fde17bc05b7f27546d\"]}";
+    printf("%s", VerifyGroth16Proof(proofString));
+}
