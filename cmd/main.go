@@ -1,10 +1,15 @@
 package main
 
+/*
+#include <stdlib.h> // Include C standard library, if necessary
+*/
+import "C"
 import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
 	"math/big"
+	// "unsafe"
 
 	gl "github.com/cf/gnark-plonky2-verifier/goldilocks"
 	"github.com/cf/gnark-plonky2-verifier/types"
@@ -57,11 +62,12 @@ func (c *CRVerifierCircuit) Define(api frontend.API) error {
 	return nil
 }
 
-func GenerateGroth16Proof(path string) {
-	commonCircuitData := types.ReadCommonCircuitData(path + "/common_circuit_data.json")
+//export GenerateGroth16Proof
+func GenerateGroth16Proof(path *C.char) *C.char {
+	commonCircuitData := types.ReadCommonCircuitData(C.GoString(path) + "/common_circuit_data.json")
 
-	proofWithPis := variables.DeserializeProofWithPublicInputs(types.ReadProofWithPublicInputs(path + "/proof_with_public_inputs.json"))
-	verifierOnlyCircuitData := variables.DeserializeVerifierOnlyCircuitData(types.ReadVerifierOnlyCircuitData(path + "/verifier_only_circuit_data.json"))
+	proofWithPis := variables.DeserializeProofWithPublicInputs(types.ReadProofWithPublicInputs(C.GoString(path) + "/proof_with_public_inputs.json"))
+	verifierOnlyCircuitData := variables.DeserializeVerifierOnlyCircuitData(types.ReadVerifierOnlyCircuitData(C.GoString(path) + "/verifier_only_circuit_data.json"))
 
 	circuit := CRVerifierCircuit{
 		PublicInputs:            make([]frontend.Variable, 2),
@@ -71,9 +77,9 @@ func GenerateGroth16Proof(path string) {
 		CommonCircuitData:       commonCircuitData,
 	}
 
-	rawProofWithPis := types.ReadProofWithPublicInputs(path + "/proof_with_public_inputs.json")
+	rawProofWithPis := types.ReadProofWithPublicInputs(C.GoString(path) + "/proof_with_public_inputs.json")
 	proofWithPis = variables.DeserializeProofWithPublicInputs(rawProofWithPis)
-	verifierOnlyCircuitData = variables.DeserializeVerifierOnlyCircuitData(types.ReadVerifierOnlyCircuitData(path + "/verifier_only_circuit_data.json"))
+	verifierOnlyCircuitData = variables.DeserializeVerifierOnlyCircuitData(types.ReadVerifierOnlyCircuitData(C.GoString(path) + "/verifier_only_circuit_data.json"))
 
 	two_to_32 := new(big.Int).SetInt64(1 << 32)
 	two_to_31 := new(big.Int).SetInt64(1 << 31)
@@ -172,8 +178,12 @@ func GenerateGroth16Proof(path string) {
 	fmt.Println("proof:", hex.EncodeToString(proofBytes))
 	fmt.Println("public inputs:", hex.EncodeToString(piBytes))
 	fmt.Println("vk", hex.EncodeToString(vkBytes))
+
+  return C.CString(hex.EncodeToString(proofBytes))
 }
 
 func main() {
-	GenerateGroth16Proof("../testdata")
+  // cStr := C.CString("../testdata")
+	// GenerateGroth16Proof(cStr)
+  // defer C.free(unsafe.Pointer(cStr))
 }
