@@ -65,15 +65,15 @@ func (p G16ProofWithPublicInputs) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		panic(err)
 	}
-	public_iniputs_arr := hex.EncodeToString(buffer.Bytes())[24:]
+	public_inputs_arr := hex.EncodeToString(buffer.Bytes())[24:]
 
 	proof_map := map[string]interface{}{
-		"pi_a":           [2]string{pi_a_arr[0], pi_a_arr[1]},
-		"pi_b":           [2][2]string{{pi_b_arr[0], pi_b_arr[1]}, {pi_b_arr[2], pi_b_arr[3]}},
-		"pi_c":           [2]string{pi_c_arr[0], pi_c_arr[1]},
-		"Commitments":    hex.EncodeToString(writer.Bytes()),
-		"CommitmentPok":  hex.EncodeToString((&proof.CommitmentPok).Marshal()),
-		"public_iniputs": [2]string{public_iniputs_arr[0:64], public_iniputs_arr[64:128]},
+		"pi_a":          [2]string{pi_a_arr[0], pi_a_arr[1]},
+		"pi_b":          [2][2]string{{pi_b_arr[1], pi_b_arr[0]}, {pi_b_arr[3], pi_b_arr[2]}},
+		"pi_c":          [2]string{pi_c_arr[0], pi_c_arr[1]},
+		"Commitments":   hex.EncodeToString(writer.Bytes()),
+		"CommitmentPok": hex.EncodeToString((&proof.CommitmentPok).Marshal()),
+		"public_inputs": [2]string{public_inputs_arr[0:64], public_inputs_arr[64:128]},
 	}
 	return json.Marshal(proof_map)
 
@@ -103,7 +103,7 @@ func (p *G16ProofWithPublicInputs) UnmarshalJSON(data []byte) error {
 		PiC           [2]string    `json:"pi_c"`
 		Commitments   string       `json:"Commitments"`
 		CommitmentPok string       `json:"CommitmentPok"`
-		PublicInputs  [2]string    `json:"public_iniputs"`
+		PublicInputs  [2]string    `json:"public_inputs"`
 	}
 
 	err := json.Unmarshal(data, &ProofString)
@@ -120,7 +120,7 @@ func (p *G16ProofWithPublicInputs) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	pib_bytes, err := hex.DecodeString(ProofString.PiB[0][0] + ProofString.PiB[0][1] + ProofString.PiB[1][0] + ProofString.PiB[1][1])
+	pib_bytes, err := hex.DecodeString(ProofString.PiB[0][1] + ProofString.PiB[0][0] + ProofString.PiB[1][1] + ProofString.PiB[1][0])
 	if err != nil {
 		return err
 	}
@@ -243,9 +243,9 @@ func (gvk G16VerifyingKey) MarshalJSON() ([]byte, error) {
 
 	vk_map := map[string]interface{}{
 		"alpha_g1":      [2]string{alpha_g1_arr[0], alpha_g1_arr[1]},
-		"beta_g2":       [2][2]string{{beta_g2_arr[0], beta_g2_arr[1]}, {beta_g2_arr[2], beta_g2_arr[3]}},
-		"gamma_g2":      [2][2]string{{gamma_g2_arr[0], gamma_g2_arr[1]}, {gamma_g2_arr[2], gamma_g2_arr[3]}},
-		"delta_g2":      [2][2]string{{delta_g2_arr[0], delta_g2_arr[1]}, {delta_g2_arr[2], delta_g2_arr[3]}},
+		"beta_g2":       [2][2]string{{beta_g2_arr[1], beta_g2_arr[0]}, {beta_g2_arr[3], beta_g2_arr[2]}},
+		"gamma_g2":      [2][2]string{{gamma_g2_arr[1], gamma_g2_arr[0]}, {gamma_g2_arr[3], gamma_g2_arr[2]}},
+		"delta_g2":      [2][2]string{{delta_g2_arr[1], delta_g2_arr[0]}, {delta_g2_arr[3], delta_g2_arr[2]}},
 		"gamma_abc_g1":  gamma_abc_g1_arr,
 		"CommitmentKey": CommitmentKey,
 		// "CommitmentKeyG": hex.EncodeToString((&vk.CommitmentKey.g).Marshal()),
@@ -297,7 +297,7 @@ func (gvk *G16VerifyingKey) UnmarshalJSON(data []byte) error {
 		}
 	}
 
-	beta_bytes, err := hex.DecodeString(VerifyingKeyString.Beta[0][0] + VerifyingKeyString.Beta[0][1] + VerifyingKeyString.Beta[1][0] + VerifyingKeyString.Beta[1][1])
+	beta_bytes, err := hex.DecodeString(VerifyingKeyString.Beta[0][1] + VerifyingKeyString.Beta[0][0] + VerifyingKeyString.Beta[1][1] + VerifyingKeyString.Beta[1][0])
 	if err != nil {
 		return err
 	}
@@ -306,7 +306,7 @@ func (gvk *G16VerifyingKey) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	gamma_bytes, err := hex.DecodeString(VerifyingKeyString.Gamma[0][0] + VerifyingKeyString.Gamma[0][1] + VerifyingKeyString.Gamma[1][0] + VerifyingKeyString.Gamma[1][1])
+	gamma_bytes, err := hex.DecodeString(VerifyingKeyString.Gamma[0][1] + VerifyingKeyString.Gamma[0][0] + VerifyingKeyString.Gamma[1][1] + VerifyingKeyString.Gamma[1][0])
 	if err != nil {
 		return err
 	}
@@ -315,7 +315,7 @@ func (gvk *G16VerifyingKey) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	delta_bytes, err := hex.DecodeString(VerifyingKeyString.Delta[0][0] + VerifyingKeyString.Delta[0][1] + VerifyingKeyString.Delta[1][0] + VerifyingKeyString.Delta[1][1])
+	delta_bytes, err := hex.DecodeString(VerifyingKeyString.Delta[0][1] + VerifyingKeyString.Delta[0][0] + VerifyingKeyString.Delta[1][1] + VerifyingKeyString.Delta[1][0])
 	if err != nil {
 		return err
 	}

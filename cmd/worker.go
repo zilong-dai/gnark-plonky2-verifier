@@ -66,7 +66,7 @@ func initKeyStorePath() {
 
 }
 
-func GenerateProof(common_circuit_data string, proof_with_public_inputs string, verifier_only_circuit_data string) string {
+func GenerateProof(common_circuit_data string, proof_with_public_inputs string, verifier_only_circuit_data string) (string, string) {
 	initKeyStorePath()
 	commonCircuitData := types.ReadCommonCircuitDataRaw(common_circuit_data)
 
@@ -170,23 +170,33 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 		panic(err)
 	}
 
-	return string(proof_bytes)
+	var g16VerifyingKey = G16VerifyingKey{
+		VK: vk,
+	}
+
+	vk_bytes, err := json.Marshal(g16VerifyingKey)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(proof_bytes), string(vk_bytes)
 
 }
 
-func VerifyProof(proofString string) string {
+func VerifyProof(proofString string, vkString string) string {
 	g16ProofWithPublicInputs := NewG16ProofWithPublicInputs()
 
 	if err := json.Unmarshal([]byte(proofString), g16ProofWithPublicInputs); err != nil {
 		panic(err)
 	}
 
-	vk, err := ReadVerifyingKey(CURVE_ID, KEY_STORE_PATH+VK_PATH)
-	if err != nil {
+	g16VerifyingKey := NewG16VerifyingKey()
+
+	if err := json.Unmarshal([]byte(vkString), g16VerifyingKey); err != nil {
 		panic(err)
 	}
 
-	if err := groth16.Verify(g16ProofWithPublicInputs.Proof, vk, g16ProofWithPublicInputs.PublicInputs); err != nil {
+	if err := groth16.Verify(g16ProofWithPublicInputs.Proof, g16VerifyingKey.VK, g16ProofWithPublicInputs.PublicInputs); err != nil {
 		return "false"
 	}
 	return "true"
