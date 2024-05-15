@@ -5,6 +5,7 @@ use plonky2::plonk::proof::ProofWithPublicInputs;
 use plonky2x::backend::wrapper::wrap::WrappedCircuit;
 use plonky2x::frontend::builder::CircuitBuilder as WrapperBuilder;
 use plonky2x::prelude::DefaultParameters;
+use serde_json::to_string as json;
 
 use crate::parameters::Groth16WrapperParameters;
 
@@ -31,15 +32,21 @@ pub fn wrap_plonky2_proof(
         WrappedCircuit::<DefaultParameters, Groth16WrapperParameters, D>::build(circuit);
     let wrapped_proof = wrapped_circuit.prove(&proof)?;
     let g16_proof = gnark_plonky2_verifier_ffi::generate_groth16_proof(
-        &serde_json::to_string(&wrapped_proof.common_data)?,
-        &serde_json::to_string(&wrapped_proof.proof)?,
-        &serde_json::to_string(&wrapped_proof.verifier_data)?,
+        &json(&wrapped_proof.common_data)?,
+        &json(&wrapped_proof.proof)?,
+        &json(&wrapped_proof.verifier_data)?,
     );
     Ok(g16_proof)
 }
 
 #[cfg(test)]
 mod tests {
+    use plonky2::field::types::Field;
+    use plonky2::iop::witness::PartialWitness;
+    use plonky2::iop::witness::WitnessWrite;
+    use plonky2::plonk::circuit_builder::CircuitBuilder;
+    use plonky2::plonk::circuit_data::CircuitConfig;
+
     use super::*;
 
     #[test]
@@ -68,14 +75,9 @@ mod tests {
         let zero_t = builder.zero();
         let poly_t = builder.add_many(&[x2_t, minus_2x_t, one_t]);
         builder.connect(poly_t, zero_t); // x^2 - 2x + 1 = 0
-        builder.register_public_input(x_t);
-        builder.register_public_input(x_t);
-        builder.register_public_input(x_t);
-        builder.register_public_input(x_t);
-        builder.register_public_input(x_t);
-        builder.register_public_input(x_t);
-        builder.register_public_input(x_t);
-        builder.register_public_input(x_t);
+        for i in 0..512 {
+            builder.register_public_input(if i & 1 == 1 { one_t } else { zero_t });
+        }
 
         tracing::info!("compiling circuits...");
         let data = builder.build::<C>();

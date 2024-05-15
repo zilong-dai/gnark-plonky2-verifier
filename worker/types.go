@@ -64,7 +64,7 @@ func (p G16ProofWithPublicInputs) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		panic(err)
 	}
-	public_iniputs_arr := hex.EncodeToString(buffer.Bytes())[24:]
+	public_inputs_arr := hex.EncodeToString(buffer.Bytes())[24:]
 
 	proof_map := map[string]interface{}{
 		"pi_a":           [2]string{pi_a_arr[0], pi_a_arr[1]},
@@ -72,7 +72,7 @@ func (p G16ProofWithPublicInputs) MarshalJSON() ([]byte, error) {
 		"pi_c":           [2]string{pi_c_arr[0], pi_c_arr[1]},
 		"Commitments":    hex.EncodeToString(writer.Bytes()),
 		"CommitmentPok":  hex.EncodeToString((&proof.CommitmentPok).Marshal()),
-		"public_iniputs": [2]string{public_iniputs_arr[0:64], public_iniputs_arr[64:128]},
+		"public_inputs": [2]string{public_inputs_arr[0:64], public_inputs_arr[64:128]},
 	}
 	return json.Marshal(proof_map)
 
@@ -102,7 +102,7 @@ func (p *G16ProofWithPublicInputs) UnmarshalJSON(data []byte) error {
 		PiC           [2]string    `json:"pi_c"`
 		Commitments   string       `json:"Commitments"`
 		CommitmentPok string       `json:"CommitmentPok"`
-		PublicInputs  [2]string    `json:"public_iniputs"`
+		PublicInputs  [2]string    `json:"public_inputs"`
 	}
 
 	err := json.Unmarshal(data, &ProofString)
