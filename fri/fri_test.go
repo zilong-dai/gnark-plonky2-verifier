@@ -4,14 +4,14 @@ import (
 	"testing"
 
 	"github.com/consensys/gnark-crypto/ecc"
-	"github.com/consensys/gnark/frontend"
-	"github.com/consensys/gnark/test"
-	"github.com/cf/gnark-plonky2-verifier/challenger"
-	"github.com/cf/gnark-plonky2-verifier/fri"
-	gl "github.com/cf/gnark-plonky2-verifier/goldilocks"
-	"github.com/cf/gnark-plonky2-verifier/poseidon"
-	"github.com/cf/gnark-plonky2-verifier/types"
-	"github.com/cf/gnark-plonky2-verifier/variables"
+	"github.com/zilong-dai/gnark-plonky2-verifier/challenger"
+	"github.com/zilong-dai/gnark-plonky2-verifier/fri"
+	gl "github.com/zilong-dai/gnark-plonky2-verifier/goldilocks"
+	"github.com/zilong-dai/gnark-plonky2-verifier/poseidon"
+	"github.com/zilong-dai/gnark-plonky2-verifier/types"
+	"github.com/zilong-dai/gnark-plonky2-verifier/variables"
+	"github.com/zilong-dai/gnark/frontend"
+	"github.com/zilong-dai/gnark/test"
 )
 
 type TestFriCircuit struct {

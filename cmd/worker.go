@@ -5,13 +5,13 @@ import (
 	"math/big"
 	"os"
 
-	gl "github.com/cf/gnark-plonky2-verifier/goldilocks"
-	"github.com/cf/gnark-plonky2-verifier/types"
-	"github.com/cf/gnark-plonky2-verifier/variables"
-	"github.com/cf/gnark-plonky2-verifier/verifier"
-	"github.com/consensys/gnark/backend/groth16"
-	"github.com/consensys/gnark/frontend"
-	"github.com/consensys/gnark/frontend/cs/r1cs"
+	gl "github.com/zilong-dai/gnark-plonky2-verifier/goldilocks"
+	"github.com/zilong-dai/gnark-plonky2-verifier/types"
+	"github.com/zilong-dai/gnark-plonky2-verifier/variables"
+	"github.com/zilong-dai/gnark-plonky2-verifier/verifier"
+	"github.com/zilong-dai/gnark/backend/groth16"
+	"github.com/zilong-dai/gnark/frontend"
+	"github.com/zilong-dai/gnark/frontend/cs/r1cs"
 )
 
 type CRVerifierCircuit struct {
@@ -109,7 +109,7 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 	}
 
 	// NewWitness() must be called before Compile() to avoid gnark panicking.
-	// ref: https://github.com/Consensys/gnark/issues/1038
+	// ref: https://github.com/zilong-dai/gnark/issues/1038
 	witness, err := frontend.NewWitness(&assignment, CURVE_ID.ScalarField())
 	if err != nil {
 		panic(err)

@@ -5,8 +5,8 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/consensys/gnark/frontend"
-	gl "github.com/cf/gnark-plonky2-verifier/goldilocks"
+	gl "github.com/zilong-dai/gnark-plonky2-verifier/goldilocks"
+	"github.com/zilong-dai/gnark/frontend"
 )
 
 var randomAccessGateRegex = regexp.MustCompile("RandomAccessGate { bits: (?P<bits>[0-9]+), num_copies: (?P<numCopies>[0-9]+), num_extra_constants: (?P<numExtraConstants>[0-9]+), _phantom: PhantomData<plonky2_field::goldilocks_field::GoldilocksField> }<D=(?P<base>[0-9]+)>")

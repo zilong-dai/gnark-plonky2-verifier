@@ -7,8 +7,8 @@ import (
 	"strings"
 
 	"github.com/consensys/gnark-crypto/field/goldilocks"
-	"github.com/consensys/gnark/frontend"
-	gl "github.com/cf/gnark-plonky2-verifier/goldilocks"
+	gl "github.com/zilong-dai/gnark-plonky2-verifier/goldilocks"
+	"github.com/zilong-dai/gnark/frontend"
 )
 
 var cosetInterpolationGateRegex = regexp.MustCompile(`CosetInterpolationGate { subgroup_bits: (?P<subgroupBits>[0-9]+), degree: (?P<degree>[0-9]+), barycentric_weights: \[(?P<barycentricWeights>[0-9, ]+)\], _phantom: PhantomData<plonky2_field::goldilocks_field::GoldilocksField> }<D=2>`)

@@ -3,21 +3,21 @@ package challenger
 import (
 	"fmt"
 
-	"github.com/consensys/gnark/frontend"
-	"github.com/cf/gnark-plonky2-verifier/fri"
-	gl "github.com/cf/gnark-plonky2-verifier/goldilocks"
-	"github.com/cf/gnark-plonky2-verifier/poseidon"
-	"github.com/cf/gnark-plonky2-verifier/types"
-	"github.com/cf/gnark-plonky2-verifier/variables"
+	"github.com/zilong-dai/gnark-plonky2-verifier/fri"
+	gl "github.com/zilong-dai/gnark-plonky2-verifier/goldilocks"
+	"github.com/zilong-dai/gnark-plonky2-verifier/poseidon"
+	"github.com/zilong-dai/gnark-plonky2-verifier/types"
+	"github.com/zilong-dai/gnark-plonky2-verifier/variables"
+	"github.com/zilong-dai/gnark/frontend"
 )
 
 type Chip struct {
-	api               frontend.API `gnark:"-"`
-	poseidonChip      *poseidon.GoldilocksChip
+	api                  frontend.API `gnark:"-"`
+	poseidonChip         *poseidon.GoldilocksChip
 	poseidonBLS12381Chip *poseidon.BLS12381Chip
-	spongeState       poseidon.GoldilocksState
-	inputBuffer       []gl.Variable
-	outputBuffer      []gl.Variable
+	spongeState          poseidon.GoldilocksState
+	inputBuffer          []gl.Variable
+	outputBuffer         []gl.Variable
 }
 
 func NewChip(api frontend.API) *Chip {
@@ -30,12 +30,12 @@ func NewChip(api frontend.API) *Chip {
 	poseidonChip := poseidon.NewGoldilocksChip(api)
 	poseidonBLS12381Chip := poseidon.NewBLS12381Chip(api)
 	return &Chip{
-		api:               api,
-		poseidonChip:      poseidonChip,
+		api:                  api,
+		poseidonChip:         poseidonChip,
 		poseidonBLS12381Chip: poseidonBLS12381Chip,
-		spongeState:       spongeState,
-		inputBuffer:       inputBuffer,
-		outputBuffer:      outputBuffer,
+		spongeState:          spongeState,
+		inputBuffer:          inputBuffer,
+		outputBuffer:         outputBuffer,
 	}
 }
 

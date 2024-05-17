@@ -4,10 +4,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/consensys/gnark-crypto/ecc/bls12-381"
+	"github.com/GopherJ/gnark-ignition-verifier/ignition"
+	bls12381 "github.com/consensys/gnark-crypto/ecc/bls12-381"
 	"github.com/consensys/gnark-crypto/ecc/bls12-381/fr"
 	kzg_bls12_381 "github.com/consensys/gnark-crypto/ecc/bls12-381/kzg"
-	"github.com/GopherJ/gnark-ignition-verifier/ignition"
 )
 
 func sanityCheck(srs *kzg_bls12_381.SRS) {

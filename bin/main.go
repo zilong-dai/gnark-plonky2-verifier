@@ -10,7 +10,7 @@ import (
 	"os"
 	"unsafe"
 
-	"github.com/cf/gnark-plonky2-verifier/cmd"
+	"github.com/zilong-dai/gnark-plonky2-verifier/cmd"
 )
 
 func main() {

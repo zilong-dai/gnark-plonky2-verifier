@@ -1,24 +1,24 @@
 package verifier
 
 import (
-	"github.com/consensys/gnark/frontend"
-	"github.com/cf/gnark-plonky2-verifier/challenger"
-	"github.com/cf/gnark-plonky2-verifier/fri"
-	gl "github.com/cf/gnark-plonky2-verifier/goldilocks"
-	"github.com/cf/gnark-plonky2-verifier/plonk"
-	"github.com/cf/gnark-plonky2-verifier/poseidon"
-	"github.com/cf/gnark-plonky2-verifier/types"
-	"github.com/cf/gnark-plonky2-verifier/variables"
+	"github.com/zilong-dai/gnark-plonky2-verifier/challenger"
+	"github.com/zilong-dai/gnark-plonky2-verifier/fri"
+	gl "github.com/zilong-dai/gnark-plonky2-verifier/goldilocks"
+	"github.com/zilong-dai/gnark-plonky2-verifier/plonk"
+	"github.com/zilong-dai/gnark-plonky2-verifier/poseidon"
+	"github.com/zilong-dai/gnark-plonky2-verifier/types"
+	"github.com/zilong-dai/gnark-plonky2-verifier/variables"
+	"github.com/zilong-dai/gnark/frontend"
 )
 
 type VerifierChip struct {
-	api               frontend.API             `gnark:"-"`
-	glChip            *gl.Chip                 `gnark:"-"`
-	poseidonGlChip    *poseidon.GoldilocksChip `gnark:"-"`
-	poseidonBLS12381Chip *poseidon.BLS12381Chip      `gnark:"-"`
-	plonkChip         *plonk.PlonkChip         `gnark:"-"`
-	friChip           *fri.Chip                `gnark:"-"`
-	commonData        types.CommonCircuitData  `gnark:"-"`
+	api                  frontend.API             `gnark:"-"`
+	glChip               *gl.Chip                 `gnark:"-"`
+	poseidonGlChip       *poseidon.GoldilocksChip `gnark:"-"`
+	poseidonBLS12381Chip *poseidon.BLS12381Chip   `gnark:"-"`
+	plonkChip            *plonk.PlonkChip         `gnark:"-"`
+	friChip              *fri.Chip                `gnark:"-"`
+	commonData           types.CommonCircuitData  `gnark:"-"`
 }
 
 func NewVerifierChip(api frontend.API, commonCircuitData types.CommonCircuitData) *VerifierChip {
@@ -28,13 +28,13 @@ func NewVerifierChip(api frontend.API, commonCircuitData types.CommonCircuitData
 	poseidonGlChip := poseidon.NewGoldilocksChip(api)
 	poseidonBLS12381Chip := poseidon.NewBLS12381Chip(api)
 	return &VerifierChip{
-		api:               api,
-		glChip:            glChip,
-		poseidonGlChip:    poseidonGlChip,
+		api:                  api,
+		glChip:               glChip,
+		poseidonGlChip:       poseidonGlChip,
 		poseidonBLS12381Chip: poseidonBLS12381Chip,
-		plonkChip:         plonkChip,
-		friChip:           friChip,
-		commonData:        commonCircuitData,
+		plonkChip:            plonkChip,
+		friChip:              friChip,
+		commonData:           commonCircuitData,
 	}
 }
 

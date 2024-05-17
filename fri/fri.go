@@ -7,19 +7,19 @@ import (
 	"math/bits"
 
 	"github.com/consensys/gnark-crypto/field/goldilocks"
-	"github.com/consensys/gnark/frontend"
-	gl "github.com/cf/gnark-plonky2-verifier/goldilocks"
-	"github.com/cf/gnark-plonky2-verifier/poseidon"
-	"github.com/cf/gnark-plonky2-verifier/types"
-	"github.com/cf/gnark-plonky2-verifier/variables"
+	gl "github.com/zilong-dai/gnark-plonky2-verifier/goldilocks"
+	"github.com/zilong-dai/gnark-plonky2-verifier/poseidon"
+	"github.com/zilong-dai/gnark-plonky2-verifier/types"
+	"github.com/zilong-dai/gnark-plonky2-verifier/variables"
+	"github.com/zilong-dai/gnark/frontend"
 )
 
 type Chip struct {
-	api               frontend.API             `gnark:"-"`
-	gl                *gl.Chip                 `gnark:"-"`
-	poseidonBLS12381Chip *poseidon.BLS12381Chip      `gnark:"-"`
-	commonData        *types.CommonCircuitData `gnark:"-"`
-	friParams         *types.FriParams         `gnark:"-"`
+	api                  frontend.API             `gnark:"-"`
+	gl                   *gl.Chip                 `gnark:"-"`
+	poseidonBLS12381Chip *poseidon.BLS12381Chip   `gnark:"-"`
+	commonData           *types.CommonCircuitData `gnark:"-"`
+	friParams            *types.FriParams         `gnark:"-"`
 }
 
 func NewChip(
@@ -29,11 +29,11 @@ func NewChip(
 ) *Chip {
 	poseidonBLS12381Chip := poseidon.NewBLS12381Chip(api)
 	return &Chip{
-		api:               api,
+		api:                  api,
 		poseidonBLS12381Chip: poseidonBLS12381Chip,
-		commonData:        commonData,
-		friParams:         friParams,
-		gl:                gl.New(api),
+		commonData:           commonData,
+		friParams:            friParams,
+		gl:                   gl.New(api),
 	}
 }
 

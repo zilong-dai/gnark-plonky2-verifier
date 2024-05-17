@@ -4,10 +4,10 @@ import (
 	"testing"
 
 	"github.com/consensys/gnark-crypto/ecc"
-	"github.com/consensys/gnark/test"
-	"github.com/cf/gnark-plonky2-verifier/types"
-	"github.com/cf/gnark-plonky2-verifier/variables"
-	"github.com/cf/gnark-plonky2-verifier/verifier"
+	"github.com/zilong-dai/gnark-plonky2-verifier/types"
+	"github.com/zilong-dai/gnark-plonky2-verifier/variables"
+	"github.com/zilong-dai/gnark-plonky2-verifier/verifier"
+	"github.com/zilong-dai/gnark/test"
 )
 
 func TestStepVerifier(t *testing.T) {

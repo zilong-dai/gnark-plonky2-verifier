@@ -1,7 +1,7 @@
 package poseidon
 
 import (
-	"github.com/consensys/gnark/frontend"
+	"github.com/zilong-dai/gnark/frontend"
 )
 
 var ALL_ROUND_CONSTANTS = []frontend.Variable{

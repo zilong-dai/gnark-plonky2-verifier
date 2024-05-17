@@ -3,11 +3,11 @@ package goldilocks
 import (
 	"math"
 
-	"github.com/consensys/gnark/frontend"
+	"github.com/zilong-dai/gnark/frontend"
 )
 
 // The types, structs, and functions in this file were ported over from the gnark library
-// https://github.com/Consensys/gnark/blob/3421eaa7d544286abf3de8c46282b8d4da6d5da0/std/rangecheck/rangecheck_commit.go
+// https://github.com/zilong-dai/gnark/blob/3421eaa7d544286abf3de8c46282b8d4da6d5da0/std/rangecheck/rangecheck_commit.go
 type Type int
 
 const (
@@ -78,7 +78,7 @@ func nbPLONKConstraints(baseLength int, collected []checkedVariable) int {
 
 func gnarkRangeCheckerSelector(api frontend.API) RangeCheckerType {
 	// Emulate the logic within rangecheck.New
-	// https://github.com/Consensys/gnark/blob/3421eaa7d544286abf3de8c46282b8d4da6d5da0/std/rangecheck/rangecheck.go#L24
+	// https://github.com/zilong-dai/gnark/blob/3421eaa7d544286abf3de8c46282b8d4da6d5da0/std/rangecheck/rangecheck.go#L24
 	if _, ok := api.(frontend.Rangechecker); ok {
 		return NATIVE_RANGE_CHECKER
 	} else if _, ok := api.(frontend.Committer); ok {

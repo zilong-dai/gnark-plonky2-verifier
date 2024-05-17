@@ -6,12 +6,12 @@ import (
 
 	"github.com/consensys/gnark-crypto/ecc"
 	"github.com/consensys/gnark-crypto/field/goldilocks"
-	"github.com/consensys/gnark/frontend"
-	"github.com/consensys/gnark/test"
-	gl "github.com/cf/gnark-plonky2-verifier/goldilocks"
-	"github.com/cf/gnark-plonky2-verifier/plonk/gates"
-	"github.com/cf/gnark-plonky2-verifier/poseidon"
-	"github.com/cf/gnark-plonky2-verifier/types"
+	gl "github.com/zilong-dai/gnark-plonky2-verifier/goldilocks"
+	"github.com/zilong-dai/gnark-plonky2-verifier/plonk/gates"
+	"github.com/zilong-dai/gnark-plonky2-verifier/poseidon"
+	"github.com/zilong-dai/gnark-plonky2-verifier/types"
+	"github.com/zilong-dai/gnark/frontend"
+	"github.com/zilong-dai/gnark/test"
 )
 
 // From recursive_step circuit

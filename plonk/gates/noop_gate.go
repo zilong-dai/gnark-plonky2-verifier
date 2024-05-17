@@ -3,8 +3,8 @@ package gates
 import (
 	"regexp"
 
-	"github.com/consensys/gnark/frontend"
-	gl "github.com/cf/gnark-plonky2-verifier/goldilocks"
+	gl "github.com/zilong-dai/gnark-plonky2-verifier/goldilocks"
+	"github.com/zilong-dai/gnark/frontend"
 )
 
 var noopGateRegex = regexp.MustCompile("NoopGate")

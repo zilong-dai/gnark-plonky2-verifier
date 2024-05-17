@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/cf/gnark-plonky2-verifier/plonk/gates"
+	"github.com/zilong-dai/gnark-plonky2-verifier/plonk/gates"
 )
 
 type CommonCircuitDataRaw struct {

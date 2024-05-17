@@ -3,8 +3,8 @@ package goldilocks
 import (
 	"math/big"
 
-	"github.com/consensys/gnark/frontend"
-	"github.com/consensys/gnark/std/math/bits"
+	"github.com/zilong-dai/gnark/frontend"
+	"github.com/zilong-dai/gnark/std/math/bits"
 )
 
 func StrArrayToBigIntArray(input []string) []big.Int {

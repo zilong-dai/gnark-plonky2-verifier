@@ -10,18 +10,18 @@ import (
 
 	"github.com/consensys/gnark-crypto/ecc"
 	"github.com/consensys/gnark-crypto/kzg"
-	"github.com/consensys/gnark/backend/groth16"
-	"github.com/consensys/gnark/backend/plonk"
-	"github.com/consensys/gnark/constraint"
-	"github.com/consensys/gnark/frontend"
-	"github.com/consensys/gnark/frontend/cs/r1cs"
-	"github.com/consensys/gnark/frontend/cs/scs"
-	"github.com/consensys/gnark/profile"
-	"github.com/consensys/gnark/test"
-	"github.com/cf/gnark-plonky2-verifier/trusted_setup"
-	"github.com/cf/gnark-plonky2-verifier/types"
-	"github.com/cf/gnark-plonky2-verifier/variables"
-	"github.com/cf/gnark-plonky2-verifier/verifier"
+	"github.com/zilong-dai/gnark-plonky2-verifier/trusted_setup"
+	"github.com/zilong-dai/gnark-plonky2-verifier/types"
+	"github.com/zilong-dai/gnark-plonky2-verifier/variables"
+	"github.com/zilong-dai/gnark-plonky2-verifier/verifier"
+	"github.com/zilong-dai/gnark/backend/groth16"
+	"github.com/zilong-dai/gnark/backend/plonk"
+	"github.com/zilong-dai/gnark/constraint"
+	"github.com/zilong-dai/gnark/frontend"
+	"github.com/zilong-dai/gnark/frontend/cs/r1cs"
+	"github.com/zilong-dai/gnark/frontend/cs/scs"
+	"github.com/zilong-dai/gnark/profile"
+	"github.com/zilong-dai/gnark/test/unsafekzg"
 )
 
 func runBenchmark(plonky2Circuit string, proofSystem string, profileCircuit bool, dummy bool, saveArtifacts bool) {
@@ -81,6 +81,7 @@ func plonkProof(r1cs constraint.ConstraintSystem, circuitName string, dummy bool
 	var pk plonk.ProvingKey
 	var vk plonk.VerifyingKey
 	var srs kzg.SRS = kzg.NewSRS(ecc.BLS12_381)
+	var srsLagrange kzg.SRS = kzg.NewSRS(ecc.BLS12_381)
 	var err error
 
 	proofWithPis := variables.DeserializeProofWithPublicInputs(types.ReadProofWithPublicInputs("testdata/" + circuitName + "/proof_with_public_inputs.json"))
@@ -102,7 +103,7 @@ func plonkProof(r1cs constraint.ConstraintSystem, circuitName string, dummy bool
 	if dummy {
 		fmt.Println("Using test setup")
 
-		srs, err = test.NewKZGSRS(r1cs)
+		srs, srsLagrange, err = unsafekzg.NewSRS(r1cs)
 
 		if err != nil {
 			panic(err)
@@ -126,8 +127,7 @@ func plonkProof(r1cs constraint.ConstraintSystem, circuitName string, dummy bool
 			panic(err)
 		}
 	}
-
-	pk, vk, err = plonk.Setup(r1cs, srs)
+	pk, vk, err = plonk.Setup(r1cs, srs, srsLagrange)
 
 	if err != nil {
 		fmt.Println(err)
@@ -304,10 +304,10 @@ func groth16Proof(r1cs constraint.ConstraintSystem, circuitName string, dummy bo
 }
 
 func main() {
-	plonky2Circuit := flag.String("plonky2-circuit", "step", "plonky2 circuit to benchmark")
-	proofSystem := flag.String("proof-system", "plonk", "proof system to benchmark")
-	profileCircuit := flag.Bool("profile", true, "profile the circuit")
-	dummySetup := flag.Bool("dummy", true, "use dummy setup")
+	plonky2Circuit := flag.String("plonky2-circuit", "./", "plonky2 circuit to benchmark")
+	proofSystem := flag.String("proof-system", "groth16", "proof system to benchmark")
+	profileCircuit := flag.Bool("profile", false, "profile the circuit")
+	dummySetup := flag.Bool("dummy", false, "use dummy setup")
 	saveArtifacts := flag.Bool("save", false, "save circuit artifacts")
 
 	flag.Parse()

@@ -1,8 +1,8 @@
 package gates
 
 import (
-	gl "github.com/cf/gnark-plonky2-verifier/goldilocks"
-	"github.com/cf/gnark-plonky2-verifier/poseidon"
+	gl "github.com/zilong-dai/gnark-plonky2-verifier/goldilocks"
+	"github.com/zilong-dai/gnark-plonky2-verifier/poseidon"
 )
 
 type EvaluationVars struct {

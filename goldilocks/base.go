@@ -23,10 +23,10 @@ import (
 	"sync"
 
 	"github.com/consensys/gnark-crypto/field/goldilocks"
-	"github.com/consensys/gnark/constraint/solver"
-	"github.com/consensys/gnark/frontend"
-	"github.com/consensys/gnark/std/math/emulated"
-	"github.com/consensys/gnark/std/rangecheck"
+	"github.com/zilong-dai/gnark/constraint/solver"
+	"github.com/zilong-dai/gnark/frontend"
+	"github.com/zilong-dai/gnark/std/math/emulated"
+	"github.com/zilong-dai/gnark/std/rangecheck"
 )
 
 // The multiplicative group generator of the field.
@@ -44,7 +44,7 @@ var MODULUS *big.Int = emulated.Goldilocks{}.Modulus()
 // The number of bits to use for range checks on inner products of field elements.
 // This MUST be a multiple of EXPECTED_OPTIMAL_BASEWIDTH if the commit based range checker is used.
 // There is a bug in the pre 0.9.2 gnark range checker where it wouldn't appropriately range check a bitwidth that
-// is misaligned from EXPECTED_OPTIMAL_BASEWIDTH:  https://github.com/Consensys/gnark/security/advisories/GHSA-rjjm-x32p-m3f7
+// is misaligned from EXPECTED_OPTIMAL_BASEWIDTH:  https://github.com/zilong-dai/gnark/security/advisories/GHSA-rjjm-x32p-m3f7
 var RANGE_CHECK_NB_BITS int = 144
 
 // The bit width size that the gnark commit based range checker should use.
@@ -125,7 +125,7 @@ func New(api frontend.API) *Chip {
 	// 2. The commit range checker
 	// 3. The bit decomposition range checker
 	//
-	// See https://github.com/Consensys/gnark/blob/3421eaa7d544286abf3de8c46282b8d4da6d5da0/std/rangecheck/rangecheck.go#L3
+	// See https://github.com/zilong-dai/gnark/blob/3421eaa7d544286abf3de8c46282b8d4da6d5da0/std/rangecheck/rangecheck.go#L3
 
 	// This function will emulate gnark's range checker selection logic (within the gnarkRangeCheckSelector func).  However,
 	// if the USE_BIT_DECOMPOSITION_RANGE_CHECK env var is set, then it will explicitly use the bit decomposition range checker.

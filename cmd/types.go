@@ -7,9 +7,9 @@ import (
 
 	"github.com/consensys/gnark-crypto/ecc"
 	curve "github.com/consensys/gnark-crypto/ecc/bls12-381"
-	"github.com/consensys/gnark/backend/groth16"
-	bls12381 "github.com/consensys/gnark/backend/groth16/bls12-381"
-	"github.com/consensys/gnark/backend/witness"
+	"github.com/zilong-dai/gnark/backend/groth16"
+	bls12381 "github.com/zilong-dai/gnark/backend/groth16/bls12-381"
+	"github.com/zilong-dai/gnark/backend/witness"
 )
 
 const CURVE_ID = ecc.BLS12_381
