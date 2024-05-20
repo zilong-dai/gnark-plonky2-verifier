@@ -24,19 +24,18 @@ pub const D: usize = 2;
 pub fn wrap_plonky2_proof(
     circuit_data: CircuitData<F, C, D>,
     proof: &ProofWithPublicInputs<F, C, D>,
-) -> anyhow::Result<String> {
+) -> anyhow::Result<(String, String)> {
     let wrapper_builder = WrapperBuilder::<DefaultParameters, D>::new();
     let mut circuit = wrapper_builder.build();
     circuit.data = circuit_data;
     let wrapped_circuit =
         WrappedCircuit::<DefaultParameters, Groth16WrapperParameters, D>::build(circuit);
     let wrapped_proof = wrapped_circuit.prove(&proof)?;
-    let g16_proof = gnark_plonky2_verifier_ffi::generate_groth16_proof(
+    Ok(gnark_plonky2_verifier_ffi::generate_groth16_proof(
         &json(&wrapped_proof.common_data)?,
         &json(&wrapped_proof.proof)?,
         &json(&wrapped_proof.verifier_data)?,
-    );
-    Ok(g16_proof)
+    ))
 }
 
 #[cfg(test)]
@@ -92,12 +91,11 @@ mod tests {
         tracing::info!("done!");
 
         tracing::info!("compiling wrapping circuits...");
-        let g16_proof = wrap_plonky2_proof(data, &proof)?;
-        tracing::info!("proving...");
-        tracing::info!("saving...");
+        let (g16_proof, g16_vk) = wrap_plonky2_proof(data, &proof)?;
         tracing::info!("done!");
 
-        println!("{}", g16_proof);
+        println!("proof {}", g16_proof);
+        println!("vk {}", g16_vk);
 
         Ok(())
     }

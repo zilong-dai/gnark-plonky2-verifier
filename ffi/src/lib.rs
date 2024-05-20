@@ -20,19 +20,20 @@ pub fn generate_groth16_proof(
     common_circuit_data: &str,
     proof_with_public_inputs: &str,
     verifier_only_circuit_data: &str,
-) -> String {
+) -> (String, String) {
     let c_common_circuit_data = CString::new(common_circuit_data).unwrap();
     let c_proof_with_public_inputs = CString::new(proof_with_public_inputs).unwrap();
     let c_verifier_only_circuit_data = CString::new(verifier_only_circuit_data).unwrap();
     unsafe {
-        let c_proof = bindings::GenerateGroth16Proof(
+        let c_proof_with_vk = bindings::GenerateGroth16Proof(
             c_common_circuit_data.into_raw(),
             c_proof_with_public_inputs.into_raw(),
             c_verifier_only_circuit_data.into_raw(),
         );
-        let proof = CStr::from_ptr(c_proof).to_string_lossy().into_owned();
-        libc::free(c_proof as *mut libc::c_void);
-        proof
+        let proof = CStr::from_ptr((*c_proof_with_vk).proof).to_string_lossy().into_owned();
+        let vk = CStr::from_ptr((*c_proof_with_vk).vk).to_string_lossy().into_owned();
+        libc::free(c_proof_with_vk as *mut libc::c_void);
+        (proof, vk)
     }
 }
 

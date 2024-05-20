@@ -5,15 +5,17 @@ import (
 	"math/big"
 	"os"
 
+	"github.com/GopherJ/doge-covenant/serialize"
 	gl "github.com/cf/gnark-plonky2-verifier/goldilocks"
 	"github.com/cf/gnark-plonky2-verifier/types"
 	"github.com/cf/gnark-plonky2-verifier/variables"
 	"github.com/cf/gnark-plonky2-verifier/verifier"
+	"github.com/consensys/gnark-crypto/ecc/bls12-381/fr"
 	"github.com/consensys/gnark/backend/groth16"
+	groth16_bls12381 "github.com/consensys/gnark/backend/groth16/bls12-381"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/frontend/cs/r1cs"
 )
-
 
 type CRVerifierCircuit struct {
 	PublicInputs            []frontend.Variable               `gnark:",public"`
@@ -63,7 +65,7 @@ func initKeyStorePath() {
 	}
 }
 
-func GenerateProof(common_circuit_data string, proof_with_public_inputs string, verifier_only_circuit_data string) string {
+func GenerateProof(common_circuit_data string, proof_with_public_inputs string, verifier_only_circuit_data string) (string, string) {
 	initKeyStorePath()
 	commonCircuitData := types.ReadCommonCircuitDataRaw(common_circuit_data)
 
@@ -145,33 +147,46 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 		panic(err)
 	}
 
-	var g16ProofWithPublicInputs = G16ProofWithPublicInputs{
-		Proof:        proof,
-		PublicInputs: publicWitness,
-	}
+	blsProof := proof.(*groth16_bls12381.Proof)
+	blsWitness := publicWitness.Vector().(fr.Vector)
 
-	proof_bytes, err := json.Marshal(g16ProofWithPublicInputs)
+  proof_city, err := serialize.ToJsonCityProof(blsProof, blsWitness)
+  if err != nil {
+    panic(err)
+  }
+
+	proof_bytes, err := json.Marshal(&proof_city)
 	if err != nil {
 		panic(err)
 	}
 
-	return string(proof_bytes)
+	var g16VerifyingKey = G16VerifyingKey{
+		VK: vk,
+	}
+
+	vk_bytes, err := json.Marshal(g16VerifyingKey)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(proof_bytes), string(vk_bytes)
 
 }
 
-func VerifyProof(proofString string) string {
+func VerifyProof(proofString string, vkString string) string {
 	g16ProofWithPublicInputs := NewG16ProofWithPublicInputs()
 
 	if err := json.Unmarshal([]byte(proofString), g16ProofWithPublicInputs); err != nil {
 		panic(err)
 	}
 
-	vk, err := ReadVerifyingKey(CURVE_ID, KEY_STORE_PATH+VK_PATH)
-	if err != nil {
+	g16VerifyingKey := NewG16VerifyingKey()
+
+	if err := json.Unmarshal([]byte(vkString), g16VerifyingKey); err != nil {
 		panic(err)
 	}
 
-	if err := groth16.Verify(g16ProofWithPublicInputs.Proof, vk, g16ProofWithPublicInputs.PublicInputs); err != nil {
+	if err := groth16.Verify(g16ProofWithPublicInputs.Proof, g16VerifyingKey.VK, g16ProofWithPublicInputs.PublicInputs); err != nil {
 		return "false"
 	}
 	return "true"
