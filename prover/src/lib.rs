@@ -99,4 +99,11 @@ mod tests {
 
         Ok(())
     }
+
+    #[test]
+    fn test_setup_once() {
+       test_prover().unwrap();
+       test_prover().unwrap();
+       test_prover().unwrap();
+    }
 }

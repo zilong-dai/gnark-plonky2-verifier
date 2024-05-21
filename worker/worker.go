@@ -2,17 +2,21 @@ package worker
 
 import (
 	"encoding/json"
+	"fmt"
 	"math/big"
 	"os"
+	"sync"
 
 	"github.com/GopherJ/doge-covenant/serialize"
 	gl "github.com/cf/gnark-plonky2-verifier/goldilocks"
 	"github.com/cf/gnark-plonky2-verifier/types"
 	"github.com/cf/gnark-plonky2-verifier/variables"
 	"github.com/cf/gnark-plonky2-verifier/verifier"
+	"github.com/consensys/gnark-crypto/ecc"
 	"github.com/consensys/gnark-crypto/ecc/bls12-381/fr"
 	"github.com/consensys/gnark/backend/groth16"
 	groth16_bls12381 "github.com/consensys/gnark/backend/groth16/bls12-381"
+	"github.com/consensys/gnark/constraint"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/frontend/cs/r1cs"
 )
@@ -65,11 +69,23 @@ func initKeyStorePath() {
 	}
 }
 
+var (
+	ponce          *sync.Once
+	PK             groth16.ProvingKey
+	VK             groth16.VerifyingKey
+	CS             constraint.ConstraintSystem
+	CIRCUIT_DIGEST string
+
+  cs             constraint.ConstraintSystem
+)
+
 func GenerateProof(common_circuit_data string, proof_with_public_inputs string, verifier_only_circuit_data string) (string, string) {
 	initKeyStorePath()
 	commonCircuitData := types.ReadCommonCircuitDataRaw(common_circuit_data)
 
-	verifierOnlyCircuitData := variables.DeserializeVerifierOnlyCircuitData(types.ReadVerifierOnlyCircuitDataRaw(verifier_only_circuit_data))
+	verifierOnlyCircuitDataRaw := types.ReadVerifierOnlyCircuitDataRaw(verifier_only_circuit_data)
+	fmt.Println("circuit digest: ", verifierOnlyCircuitDataRaw.CircuitDigest)
+	verifierOnlyCircuitData := variables.DeserializeVerifierOnlyCircuitData(verifierOnlyCircuitDataRaw)
 
 	rawProofWithPis := types.ReadProofWithPublicInputsRaw(proof_with_public_inputs)
 	proofWithPis := variables.DeserializeProofWithPublicInputs(rawProofWithPis)
@@ -106,29 +122,46 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 
 	// NewWitness() must be called before Compile() to avoid gnark panicking.
 	// ref: https://github.com/Consensys/gnark/issues/1038
-	witness, err := frontend.NewWitness(&assignment, CURVE_ID.ScalarField())
+	witness, err := frontend.NewWitness(&assignment, ecc.BLS12_381.ScalarField())
 	if err != nil {
 		panic(err)
 	}
 
-	cs, err := frontend.Compile(CURVE_ID.ScalarField(), r1cs.NewBuilder, &circuit)
-	if err != nil {
-		panic(err)
+
+  needSetup := ponce == nil || CIRCUIT_DIGEST != verifierOnlyCircuitDataRaw.CircuitDigest
+	if needSetup {
+		ponce = new(sync.Once)
 	}
-	pk, vk, err := groth16.Setup(cs)
-	if err != nil {
+	ponce.Do(func() {
+		CIRCUIT_DIGEST = verifierOnlyCircuitDataRaw.CircuitDigest
+    CS, err := frontend.Compile(ecc.BLS12_381.ScalarField(), r1cs.NewBuilder, &circuit)
+    if err != nil {
+      panic(err)
+    }
+		PK, VK, err = groth16.Setup(CS)
+		if err != nil {
+			panic(err)
+		}
+	})
+
+  if needSetup {
+    cs = CS // copy the global setup
+  } else {
+    cs, err = frontend.Compile(ecc.BLS12_381.ScalarField(), r1cs.NewBuilder, &circuit)
+    if err != nil {
+      panic(err)
+    }
+  }
+
+	if err := WriteVerifyingKey(VK, KEY_STORE_PATH+VK_PATH); err != nil {
 		panic(err)
 	}
 
-	if err := WriteVerifyingKey(vk, KEY_STORE_PATH+VK_PATH); err != nil {
+	if err := WriteProvingKey(PK, KEY_STORE_PATH+PK_PATH); err != nil {
 		panic(err)
 	}
 
-	if err := WriteProvingKey(pk, KEY_STORE_PATH+PK_PATH); err != nil {
-		panic(err)
-	}
-
-	proof, err := groth16.Prove(cs, pk, witness)
+	proof, err := groth16.Prove(cs, PK, witness)
 	if err != nil {
 		panic(err)
 	}
@@ -142,7 +175,7 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 		panic(err)
 	}
 
-	err = groth16.Verify(proof, vk, publicWitness)
+	err = groth16.Verify(proof, VK, publicWitness)
 	if err != nil {
 		panic(err)
 	}
@@ -150,10 +183,10 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 	blsProof := proof.(*groth16_bls12381.Proof)
 	blsWitness := publicWitness.Vector().(fr.Vector)
 
-  proof_city, err := serialize.ToJsonCityProof(blsProof, blsWitness)
-  if err != nil {
-    panic(err)
-  }
+	proof_city, err := serialize.ToJsonCityProof(blsProof, blsWitness)
+	if err != nil {
+		panic(err)
+	}
 
 	proof_bytes, err := json.Marshal(&proof_city)
 	if err != nil {
@@ -161,7 +194,7 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 	}
 
 	var g16VerifyingKey = G16VerifyingKey{
-		VK: vk,
+		VK: VK,
 	}
 
 	vk_bytes, err := json.Marshal(g16VerifyingKey)

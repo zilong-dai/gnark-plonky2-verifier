@@ -12,7 +12,6 @@ import (
 	"github.com/consensys/gnark/backend/witness"
 )
 
-const CURVE_ID = ecc.BLS12_381
 const KEY_STORE_PATH = "/tmp/groth16-keystore/"
 
 var CIRCUIT_PATH string = "circuit_groth16.bin"
@@ -81,9 +80,9 @@ func (p G16ProofWithPublicInputs) MarshalJSON() ([]byte, error) {
 
 func NewG16ProofWithPublicInputs() *G16ProofWithPublicInputs {
 
-	proof := groth16.NewProof(CURVE_ID)
+	proof := groth16.NewProof(ecc.BLS12_381)
 
-	publicInputs, err := witness.New(CURVE_ID.ScalarField())
+	publicInputs, err := witness.New(ecc.BLS12_381.ScalarField())
 	if err != nil {
 		panic(err)
 	}
@@ -181,7 +180,7 @@ type G16VerifyingKey struct {
 }
 
 func NewG16VerifyingKey() *G16VerifyingKey {
-	vk := groth16.NewVerifyingKey(CURVE_ID)
+	vk := groth16.NewVerifyingKey(ecc.BLS12_381)
 	return &G16VerifyingKey{
 		VK: vk,
 	}
