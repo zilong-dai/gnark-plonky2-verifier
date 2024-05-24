@@ -36,11 +36,11 @@ func VerifyGroth16Proof(proofString *C.char, vkString *C.char) *C.char {
 }
 
 func main() {
-	common_circuit_data, _ := os.ReadFile("./testdata/0/common_circuit_data.json")
+	common_circuit_data, _ := os.ReadFile("/tmp/plonky2_proof/common_circuit_data.json")
 
-	proof_with_public_inputs, _ := os.ReadFile("./testdata/0/proof_with_public_inputs.json")
+	proof_with_public_inputs, _ := os.ReadFile("/tmp/plonky2_proof/proof_with_public_inputs.json")
 
-	verifier_only_circuit_data, _ := os.ReadFile("./testdata/0/verifier_only_circuit_data.json")
+	verifier_only_circuit_data, _ := os.ReadFile("/tmp/plonky2_proof/verifier_only_circuit_data.json")
 
-	worker.GenerateProof(string(common_circuit_data), string(proof_with_public_inputs), string(verifier_only_circuit_data), "/0/")
+	worker.GenerateProof(string(common_circuit_data), string(proof_with_public_inputs), string(verifier_only_circuit_data), "/1/")
 }
