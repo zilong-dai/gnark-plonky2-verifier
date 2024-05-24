@@ -23,10 +23,10 @@ import (
 	"sync"
 
 	"github.com/consensys/gnark-crypto/field/goldilocks"
-	"github.com/consensys/gnark/constraint/solver"
-	"github.com/consensys/gnark/frontend"
-	"github.com/consensys/gnark/std/math/emulated"
-	"github.com/consensys/gnark/std/rangecheck"
+	"github.com/zilong-dai/gnark/constraint/solver"
+	"github.com/zilong-dai/gnark/frontend"
+	"github.com/zilong-dai/gnark/std/math/emulated"
+	"github.com/zilong-dai/gnark/std/rangecheck"
 )
 
 // The multiplicative group generator of the field.

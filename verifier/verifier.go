@@ -1,7 +1,7 @@
 package verifier
 
 import (
-	"github.com/consensys/gnark/frontend"
+	"github.com/zilong-dai/gnark/frontend"
 	"github.com/cf/gnark-plonky2-verifier/challenger"
 	"github.com/cf/gnark-plonky2-verifier/fri"
 	gl "github.com/cf/gnark-plonky2-verifier/goldilocks"

@@ -1,7 +1,7 @@
 package poseidon
 
 import (
-	"github.com/consensys/gnark/frontend"
+	"github.com/zilong-dai/gnark/frontend"
 	gl "github.com/cf/gnark-plonky2-verifier/goldilocks"
 )
 

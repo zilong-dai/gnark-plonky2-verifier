@@ -13,11 +13,11 @@ import (
 	"github.com/cf/gnark-plonky2-verifier/verifier"
 	"github.com/consensys/gnark-crypto/ecc"
 	"github.com/consensys/gnark-crypto/ecc/bls12-381/fr"
-	"github.com/consensys/gnark/backend/groth16"
-	groth16_bls12381 "github.com/consensys/gnark/backend/groth16/bls12-381"
-	"github.com/consensys/gnark/constraint"
-	"github.com/consensys/gnark/frontend"
-	"github.com/consensys/gnark/frontend/cs/r1cs"
+	"github.com/zilong-dai/gnark/backend/groth16"
+	groth16_bls12381 "github.com/zilong-dai/gnark/backend/groth16/bls12-381"
+	"github.com/zilong-dai/gnark/constraint"
+	"github.com/zilong-dai/gnark/frontend"
+	"github.com/zilong-dai/gnark/frontend/cs/r1cs"
 )
 
 type CRVerifierCircuit struct {

@@ -6,8 +6,8 @@ import (
 
 	"github.com/consensys/gnark-crypto/ecc"
 	"github.com/consensys/gnark-crypto/field/goldilocks"
-	"github.com/consensys/gnark/frontend"
-	"github.com/consensys/gnark/test"
+	"github.com/zilong-dai/gnark/frontend"
+	"github.com/zilong-dai/gnark/test"
 	gl "github.com/cf/gnark-plonky2-verifier/goldilocks"
 	"github.com/cf/gnark-plonky2-verifier/plonk/gates"
 	"github.com/cf/gnark-plonky2-verifier/poseidon"

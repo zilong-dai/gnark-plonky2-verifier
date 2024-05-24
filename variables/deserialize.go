@@ -3,7 +3,7 @@ package variables
 import (
 	"math/big"
 
-	"github.com/consensys/gnark/frontend"
+	"github.com/zilong-dai/gnark/frontend"
 	gl "github.com/cf/gnark-plonky2-verifier/goldilocks"
 	"github.com/cf/gnark-plonky2-verifier/poseidon"
 	"github.com/cf/gnark-plonky2-verifier/types"

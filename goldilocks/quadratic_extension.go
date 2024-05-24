@@ -3,7 +3,7 @@ package goldilocks
 import (
 	"math/bits"
 
-	"github.com/consensys/gnark/frontend"
+	"github.com/zilong-dai/gnark/frontend"
 )
 
 const W uint64 = 7

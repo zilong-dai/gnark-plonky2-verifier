@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/consensys/gnark-crypto/ecc"
-	"github.com/consensys/gnark/frontend"
-	"github.com/consensys/gnark/test"
+	"github.com/zilong-dai/gnark/frontend"
+	"github.com/zilong-dai/gnark/test"
 	"github.com/cf/gnark-plonky2-verifier/challenger"
 	"github.com/cf/gnark-plonky2-verifier/fri"
 	gl "github.com/cf/gnark-plonky2-verifier/goldilocks"

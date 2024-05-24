@@ -3,7 +3,7 @@ package goldilocks
 import (
 	"math"
 
-	"github.com/consensys/gnark/frontend"
+	"github.com/zilong-dai/gnark/frontend"
 )
 
 // The types, structs, and functions in this file were ported over from the gnark library

@@ -7,7 +7,7 @@ import (
 	"math/bits"
 
 	"github.com/consensys/gnark-crypto/field/goldilocks"
-	"github.com/consensys/gnark/frontend"
+	"github.com/zilong-dai/gnark/frontend"
 	gl "github.com/cf/gnark-plonky2-verifier/goldilocks"
 	"github.com/cf/gnark-plonky2-verifier/poseidon"
 	"github.com/cf/gnark-plonky2-verifier/types"
