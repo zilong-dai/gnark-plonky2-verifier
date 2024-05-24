@@ -117,7 +117,7 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 		panic(err)
 	}
 
-	cs, pk, vk, err := Setup(circuit)
+	cs, pk, vk, err := Setup(&circuit)
 	if err != nil {
 		panic(err)
 	}
@@ -182,7 +182,7 @@ func VerifyProof(proofString string, vkString string) string {
 	return "true"
 }
 
-func Setup(circuit CRVerifierCircuit) (constraint.ConstraintSystem, groth16.ProvingKey, groth16.VerifyingKey, error) {
+func Setup(circuit *CRVerifierCircuit) (constraint.ConstraintSystem, groth16.ProvingKey, groth16.VerifyingKey, error) {
 	if _, err := os.Stat(KEY_STORE_PATH + VK_PATH); err == nil {
 		ccs, err := ReadCircuit(ecc.BLS12_381, KEY_STORE_PATH+CIRCUIT_PATH)
 		if err != nil {
@@ -199,7 +199,7 @@ func Setup(circuit CRVerifierCircuit) (constraint.ConstraintSystem, groth16.Prov
 		return ccs, pk, vk, nil
 	}
 
-	ccs, err := frontend.Compile(ecc.BLS12_381.ScalarField(), r1cs.NewBuilder, &circuit)
+	ccs, err := frontend.Compile(ecc.BLS12_381.ScalarField(), r1cs.NewBuilder, circuit)
 	if err != nil {
 		return nil, nil, nil, err
 	}
