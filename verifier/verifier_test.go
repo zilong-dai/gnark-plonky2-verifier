@@ -39,22 +39,22 @@ func (c *CRVerifierCircuit) Define(api frontend.API) error {
 	blockStateHashAcc := frontend.Variable(0)
 	sighashAcc := frontend.Variable(0)
 	for i := 255; i >= 0; i-- {
-    api.Println("i", c.OriginalPublicInputs[i].Limb)
+    api.Println("blockStateHash[", i, "]: ", c.OriginalPublicInputs[i].Limb)
     blockStateHashAcc = api.Mul(blockStateHashAcc, two)
 		blockStateHashAcc = api.Add(blockStateHashAcc, c.OriginalPublicInputs[i].Limb)
 	}
 	for i := 511; i >= 256; i-- {
-    api.Println("i", c.OriginalPublicInputs[i].Limb)
+    api.Println("sighash[", i - 256, "]: ", c.OriginalPublicInputs[i].Limb)
     sighashAcc = api.Mul(sighashAcc, two)
 		sighashAcc = api.Add(sighashAcc, c.OriginalPublicInputs[i].Limb)
 	}
 
-	api.AssertIsEqual(c.PublicInputs[0], blockStateHashAcc)
-	api.AssertIsEqual(c.PublicInputs[1], sighashAcc)
-  api.Println("c.PublicInputs.0", c.PublicInputs[0])
-  api.Println("c.PublicInputs.1", c.PublicInputs[1])
+  api.Println("PublicInputs[0]", c.PublicInputs[0])
+  api.Println("PublicInputs[1]", c.PublicInputs[1])
   api.Println("blockStateHashAcc", blockStateHashAcc)
   api.Println("sighashAcc", sighashAcc)
+	api.AssertIsEqual(c.PublicInputs[0], blockStateHashAcc)
+	api.AssertIsEqual(c.PublicInputs[1], sighashAcc)
 
 	verifierChip.Verify(c.Proof, c.OriginalPublicInputs, c.VerifierOnlyCircuitData)
 
@@ -66,12 +66,12 @@ func TestStepVerifier(t *testing.T) {
 	assert := test.NewAssert(t)
 
 	testCase := func() {
-		plonky2Circuit := "0"
-		commonCircuitData := types.ReadCommonCircuitData("../testdata/" + plonky2Circuit + "/common_circuit_data.json")
+		path := "/tmp/plonky2_proof"
+		commonCircuitData := types.ReadCommonCircuitData(path + "/common_circuit_data.json")
 
-    rawProofWithPis := types.ReadProofWithPublicInputs("../testdata/" + plonky2Circuit + "/proof_with_public_inputs.json")
+    rawProofWithPis := types.ReadProofWithPublicInputs(path + "/proof_with_public_inputs.json")
 		proofWithPis := variables.DeserializeProofWithPublicInputs(rawProofWithPis)
-    rawVerifierOnlyCircuitData := types.ReadVerifierOnlyCircuitData("../testdata/" + plonky2Circuit + "/verifier_only_circuit_data.json")
+    rawVerifierOnlyCircuitData := types.ReadVerifierOnlyCircuitData(path + "/verifier_only_circuit_data.json")
 		verifierOnlyCircuitData := variables.DeserializeVerifierOnlyCircuitData(rawVerifierOnlyCircuitData)
 
 	two := big.NewInt(2)

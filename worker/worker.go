@@ -45,12 +45,20 @@ func (c *CRVerifierCircuit) Define(api frontend.API) error {
 	blockStateHashAcc := frontend.Variable(0)
 	sighashAcc := frontend.Variable(0)
 	for i := 255; i >= 0; i-- {
-		blockStateHashAcc = api.MulAcc(c.OriginalPublicInputs[i].Limb, blockStateHashAcc, two)
+    api.Println("blockStateHash[", i, "]: ", c.OriginalPublicInputs[i].Limb)
+    blockStateHashAcc = api.Mul(blockStateHashAcc, two)
+		blockStateHashAcc = api.Add(blockStateHashAcc, c.OriginalPublicInputs[i].Limb)
 	}
 	for i := 511; i >= 256; i-- {
-		sighashAcc = api.MulAcc(c.OriginalPublicInputs[i].Limb, sighashAcc, two)
+    api.Println("sighash[", i - 256, "]: ", c.OriginalPublicInputs[i].Limb)
+    sighashAcc = api.Mul(sighashAcc, two)
+		sighashAcc = api.Add(sighashAcc, c.OriginalPublicInputs[i].Limb)
 	}
 
+  api.Println("PublicInputs[0]", c.PublicInputs[0])
+  api.Println("blockStateHashAcc", blockStateHashAcc)
+  api.Println("PublicInputs[1]", c.PublicInputs[1])
+  api.Println("sighashAcc", sighashAcc)
 	api.AssertIsEqual(c.PublicInputs[0], blockStateHashAcc)
 	api.AssertIsEqual(c.PublicInputs[1], sighashAcc)
 
