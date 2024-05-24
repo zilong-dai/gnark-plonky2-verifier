@@ -79,12 +79,10 @@ func TestStepVerifier(t *testing.T) {
 	blockStateHashAcc := big.NewInt(0)
 	sighashAcc := big.NewInt(0)
 	for i := 255; i >= 0; i-- {
-    fmt.Println(rawProofWithPis.PublicInputs[i])
 		blockStateHashAcc = new(big.Int).Mul(blockStateHashAcc, two)
 		blockStateHashAcc = new(big.Int).Add(blockStateHashAcc, new(big.Int).SetUint64(rawProofWithPis.PublicInputs[i]))
 	}
 	for i := 511; i >= 256; i-- {
-    fmt.Println(rawProofWithPis.PublicInputs[i])
 		sighashAcc = new(big.Int).Mul(sighashAcc, two)
 		sighashAcc = new(big.Int).Add(sighashAcc, new(big.Int).SetUint64(rawProofWithPis.PublicInputs[i]))
 	}
