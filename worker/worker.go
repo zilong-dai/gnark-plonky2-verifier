@@ -15,8 +15,7 @@ import (
 	"github.com/consensys/gnark-crypto/ecc/bls12-381/fr"
 	"github.com/consensys/gnark/backend/groth16"
 	groth16_bls12381 "github.com/consensys/gnark/backend/groth16/bls12-381"
-	"github.com/consensys/gnark/backend/groth16/bls12-381/mpcsetup"
-	cs "github.com/consensys/gnark/constraint/bls12-381"
+	"github.com/consensys/gnark/constraint"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/frontend/cs/r1cs"
 )
@@ -96,7 +95,7 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 	sighash := frontend.Variable(sighashAcc)
 
 	circuit := CRVerifierCircuit{
-		PublicInputs:            []frontend.Variable{blockStateHash, sighash},
+		PublicInputs:            make([]frontend.Variable, 2),
 		Proof:                   proofWithPis.Proof,
 		OriginalPublicInputs:    proofWithPis.PublicInputs,
 		VerifierOnlyCircuitData: verifierOnlyCircuitData,
@@ -104,10 +103,11 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 	}
 
 	assignment := CRVerifierCircuit{
-		PublicInputs:            circuit.PublicInputs,
+		PublicInputs:            []frontend.Variable{blockStateHash, sighash},
 		Proof:                   circuit.Proof,
 		OriginalPublicInputs:    circuit.OriginalPublicInputs,
 		VerifierOnlyCircuitData: circuit.VerifierOnlyCircuitData,
+		CommonCircuitData:       commonCircuitData,
 	}
 
 	// NewWitness() must be called before Compile() to avoid gnark panicking.
@@ -117,11 +117,7 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 		panic(err)
 	}
 
-	cs, err := frontend.Compile(ecc.BLS12_381.ScalarField(), r1cs.NewBuilder, &circuit)
-	if err != nil {
-		panic(err)
-	}
-	pk, vk, err := Setup(&circuit)
+	cs, pk, vk, err := Setup(circuit)
 	if err != nil {
 		panic(err)
 	}
@@ -186,53 +182,44 @@ func VerifyProof(proofString string, vkString string) string {
 	return "true"
 }
 
-func Setup(circuit *CRVerifierCircuit) (groth16.ProvingKey, groth16.VerifyingKey, error) {
+func Setup(circuit CRVerifierCircuit) (constraint.ConstraintSystem, groth16.ProvingKey, groth16.VerifyingKey, error) {
 	if _, err := os.Stat(KEY_STORE_PATH + VK_PATH); err == nil {
+		ccs, err := ReadCircuit(ecc.BLS12_381, KEY_STORE_PATH+CIRCUIT_PATH)
+		if err != nil {
+			return nil, nil, nil, err
+		}
 		vk, err := ReadVerifyingKey(ecc.BLS12_381, KEY_STORE_PATH+VK_PATH)
 		if err != nil {
-      return nil, nil, err
+			return nil, nil, nil, err
 		}
 		pk, err := ReadProvingKey(ecc.BLS12_381, KEY_STORE_PATH+PK_PATH)
 		if err != nil {
-      return nil, nil, err
+			return nil, nil, nil, err
 		}
-		return pk, vk, nil
+		return ccs, pk, vk, nil
 	}
 
-	const (
-		nContributionsPhase1 = 3
-		nContributionsPhase2 = 3
-		power                = 9
-	)
-
-	srs1 := mpcsetup.InitPhase1(power)
-
-	for i := 1; i < nContributionsPhase1; i++ {
-		srs1.Contribute()
-	}
-
-	ccs, err := frontend.Compile(ecc.BLS12_381.ScalarField(), r1cs.NewBuilder, circuit)
+	ccs, err := frontend.Compile(ecc.BLS12_381.ScalarField(), r1cs.NewBuilder, &circuit)
 	if err != nil {
-      return nil, nil, err
+		return nil, nil, nil, err
 	}
 
-	var evals mpcsetup.Phase2Evaluations
-	r1cs := ccs.(*cs.R1CS)
-
-	srs2, evals := mpcsetup.InitPhase2(r1cs, &srs1)
-	for i := 1; i < nContributionsPhase2; i++ {
-		srs2.Contribute()
+	pk, vk, err := groth16.Setup(ccs)
+	if err != nil {
+		return nil, nil, nil, err
 	}
 
-	pk, vk := mpcsetup.ExtractKeys(&srs1, &srs2, &evals, ccs.GetNbConstraints())
-
-	if err := WriteVerifyingKey(&vk, KEY_STORE_PATH+VK_PATH); err != nil {
-      return nil, nil, err
+	if err := WriteCircuit(ccs, KEY_STORE_PATH+CIRCUIT_PATH); err != nil {
+		return nil, nil, nil, err
 	}
 
-	if err := WriteProvingKey(&pk, KEY_STORE_PATH+PK_PATH); err != nil {
-      return nil, nil, err
+	if err := WriteVerifyingKey(vk, KEY_STORE_PATH+VK_PATH); err != nil {
+		return nil, nil, nil, err
 	}
 
-	return &pk, &vk, nil
+	if err := WriteProvingKey(pk, KEY_STORE_PATH+PK_PATH); err != nil {
+		return nil, nil, nil, err
+	}
+
+	return ccs, pk, vk, nil
 }
