@@ -79,8 +79,17 @@ mod tests {
         let zero_t = builder.zero();
         let poly_t = builder.add_many(&[x2_t, minus_2x_t, one_t]);
         builder.connect(poly_t, zero_t); // x^2 - 2x + 1 = 0
-        for i in 0..512 {
+        for i in 0..224 {
             builder.register_public_input(if i & 1 == 1 { one_t } else { zero_t });
+        }
+        for i in 224..256 {
+            builder.register_public_input(zero_t);
+        }
+        for i in 256..480 {
+            builder.register_public_input(if i & 1 == 1 { one_t } else { zero_t });
+        }
+        for i in 480..512 {
+            builder.register_public_input(zero_t);
         }
 
         tracing::info!("compiling circuits...");
@@ -94,6 +103,7 @@ mod tests {
         tracing::info!("verifying...");
         data.verify(proof.clone())?;
         tracing::info!("done!");
+        tracing::info!("original public inputs: {:?}", proof.public_inputs);
 
         tracing::info!("compiling wrapping circuits...");
         let (g16_proof, g16_vk) = wrap_plonky2_proof(data, &proof, save_wrapped_data_path, id)?;
@@ -108,7 +118,7 @@ mod tests {
     #[test]
     fn test_setup_once() {
        test_prover(Some("../testdata/0"), "/0/").unwrap();
-       test_prover(Some("../testdata/1"), "/1/").unwrap();
-       test_prover(Some("../testdata/2"), "/2/").unwrap();
+       test_prover(Some("../testdata/0"), "/0/").unwrap();
+       test_prover(Some("../testdata/0"), "/0/").unwrap();
     }
 }

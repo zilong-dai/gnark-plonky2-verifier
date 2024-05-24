@@ -102,7 +102,7 @@ func WriteProvingKey(pk groth16.ProvingKey, path string) error {
 	}
 	defer pkFile.Close()
 
-	if _, err := pk.WriteRawTo(pkFile); err != nil {
+	if _, err := pk.WriteTo(pkFile); err != nil {
 		return fmt.Errorf("failed to write pk to file: %w", err)
 	}
 

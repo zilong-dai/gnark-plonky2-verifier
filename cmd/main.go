@@ -43,6 +43,6 @@ func main() {
 	verifier_only_circuit_data, _ := os.ReadFile("./testdata/0/verifier_only_circuit_data.json")
 
 	worker.GenerateProof(string(common_circuit_data), string(proof_with_public_inputs), string(verifier_only_circuit_data), "/0/")
-	worker.GenerateProof(string(common_circuit_data), string(proof_with_public_inputs), string(verifier_only_circuit_data), "/1/")
-	worker.GenerateProof(string(common_circuit_data), string(proof_with_public_inputs), string(verifier_only_circuit_data), "/2/")
+	// worker.GenerateProof(string(common_circuit_data), string(proof_with_public_inputs), string(verifier_only_circuit_data), "/1/")
+	// worker.GenerateProof(string(common_circuit_data), string(proof_with_public_inputs), string(verifier_only_circuit_data), "/2/")
 }
