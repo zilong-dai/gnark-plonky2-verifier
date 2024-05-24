@@ -121,7 +121,7 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 	if err != nil {
 		panic(err)
 	}
-	pk, vk := Setup(&circuit)
+	pk, vk, err := Setup(&circuit)
 	if err != nil {
 		panic(err)
 	}
@@ -186,17 +186,17 @@ func VerifyProof(proofString string, vkString string) string {
 	return "true"
 }
 
-func Setup(circuit *CRVerifierCircuit) (groth16.ProvingKey, groth16.VerifyingKey) {
+func Setup(circuit *CRVerifierCircuit) (groth16.ProvingKey, groth16.VerifyingKey, error) {
 	if _, err := os.Stat(KEY_STORE_PATH + VK_PATH); err == nil {
 		vk, err := ReadVerifyingKey(ecc.BLS12_381, KEY_STORE_PATH+VK_PATH)
 		if err != nil {
-			panic(err)
+      return nil, nil, err
 		}
 		pk, err := ReadProvingKey(ecc.BLS12_381, KEY_STORE_PATH+PK_PATH)
 		if err != nil {
-			panic(err)
+      return nil, nil, err
 		}
-		return pk, vk
+		return pk, vk, nil
 	}
 
 	const (
@@ -213,7 +213,7 @@ func Setup(circuit *CRVerifierCircuit) (groth16.ProvingKey, groth16.VerifyingKey
 
 	ccs, err := frontend.Compile(ecc.BLS12_381.ScalarField(), r1cs.NewBuilder, circuit)
 	if err != nil {
-		panic(err)
+      return nil, nil, err
 	}
 
 	var evals mpcsetup.Phase2Evaluations
@@ -227,12 +227,12 @@ func Setup(circuit *CRVerifierCircuit) (groth16.ProvingKey, groth16.VerifyingKey
 	pk, vk := mpcsetup.ExtractKeys(&srs1, &srs2, &evals, ccs.GetNbConstraints())
 
 	if err := WriteVerifyingKey(&vk, KEY_STORE_PATH+VK_PATH); err != nil {
-		panic(err)
+      return nil, nil, err
 	}
 
 	if err := WriteProvingKey(&pk, KEY_STORE_PATH+PK_PATH); err != nil {
-		panic(err)
+      return nil, nil, err
 	}
 
-	return &pk, &vk
+	return &pk, &vk, nil
 }
