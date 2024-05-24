@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,6 +11,12 @@ import (
 	"github.com/consensys/gnark/backend/witness"
 	"github.com/consensys/gnark/constraint"
 )
+
+func Sha256(data []byte) {
+  h := sha256.New()
+  h.Write([]byte(data))
+  h.Sum(nil)
+}
 
 func WriteProof(proof groth16.Proof, path string) error {
 	if proof == nil {

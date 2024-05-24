@@ -24,6 +24,8 @@ pub const D: usize = 2;
 pub fn wrap_plonky2_proof(
     circuit_data: CircuitData<F, C, D>,
     proof: &ProofWithPublicInputs<F, C, D>,
+    save_wrapped_data_path: Option<&str>,
+    id: &str,
 ) -> anyhow::Result<(String, String)> {
     let wrapper_builder = WrapperBuilder::<DefaultParameters, D>::new();
     let mut circuit = wrapper_builder.build();
@@ -31,10 +33,14 @@ pub fn wrap_plonky2_proof(
     let wrapped_circuit =
         WrappedCircuit::<DefaultParameters, Groth16WrapperParameters, D>::build(circuit);
     let wrapped_proof = wrapped_circuit.prove(&proof)?;
+    if let Some(save_wrapped_data_path) = save_wrapped_data_path {
+        wrapped_proof.save(save_wrapped_data_path)?;
+    }
     Ok(gnark_plonky2_verifier_ffi::generate_groth16_proof(
         &json(&wrapped_proof.common_data)?,
         &json(&wrapped_proof.proof)?,
         &json(&wrapped_proof.verifier_data)?,
+        id
     ))
 }
 
@@ -48,8 +54,7 @@ mod tests {
 
     use super::*;
 
-    #[test]
-    fn test_prover() -> anyhow::Result<()> {
+    fn test_prover(save_wrapped_data_path: Option<&str>, id: &str) -> anyhow::Result<()> {
         logger::setup_logger();
         // config defines number of wires of gates, FRI strategies etc.
         let config = CircuitConfig::standard_recursion_config();
@@ -91,7 +96,7 @@ mod tests {
         tracing::info!("done!");
 
         tracing::info!("compiling wrapping circuits...");
-        let (g16_proof, g16_vk) = wrap_plonky2_proof(data, &proof)?;
+        let (g16_proof, g16_vk) = wrap_plonky2_proof(data, &proof, save_wrapped_data_path, id)?;
         tracing::info!("done!");
 
         println!("proof {}", g16_proof);
@@ -102,8 +107,8 @@ mod tests {
 
     #[test]
     fn test_setup_once() {
-       test_prover().unwrap();
-       test_prover().unwrap();
-       test_prover().unwrap();
+       test_prover(Some("../testdata/0"), "/0/").unwrap();
+       test_prover(Some("../testdata/1"), "/1/").unwrap();
+       test_prover(Some("../testdata/2"), "/2/").unwrap();
     }
 }

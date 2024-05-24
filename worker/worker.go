@@ -59,17 +59,18 @@ func (c *CRVerifierCircuit) Define(api frontend.API) error {
 	return nil
 }
 
-func initKeyStorePath() {
-	_, err := os.Stat(KEY_STORE_PATH)
+func initKeyStorePath(id string) {
+	_, err := os.Stat(KEY_STORE_PATH + id)
 	if err != nil {
 		if os.IsNotExist(err) {
-			os.MkdirAll(KEY_STORE_PATH, os.ModePerm)
+			os.MkdirAll(KEY_STORE_PATH + id, os.ModePerm)
 		}
 	}
 }
 
-func GenerateProof(common_circuit_data string, proof_with_public_inputs string, verifier_only_circuit_data string) (string, string) {
-	initKeyStorePath()
+func GenerateProof(common_circuit_data string, proof_with_public_inputs string, verifier_only_circuit_data string, id string) (string, string) {
+	initKeyStorePath(id)
+
 	commonCircuitData := types.ReadCommonCircuitDataRaw(common_circuit_data)
 
 	verifierOnlyCircuitDataRaw := types.ReadVerifierOnlyCircuitDataRaw(verifier_only_circuit_data)
@@ -117,7 +118,7 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 		panic(err)
 	}
 
-	cs, pk, vk, err := Setup(&circuit)
+	cs, pk, vk, err := Setup(&circuit, id)
 	if err != nil {
 		panic(err)
 	}
@@ -182,17 +183,17 @@ func VerifyProof(proofString string, vkString string) string {
 	return "true"
 }
 
-func Setup(circuit *CRVerifierCircuit) (constraint.ConstraintSystem, groth16.ProvingKey, groth16.VerifyingKey, error) {
-	if _, err := os.Stat(KEY_STORE_PATH + VK_PATH); err == nil {
-		ccs, err := ReadCircuit(ecc.BLS12_381, KEY_STORE_PATH+CIRCUIT_PATH)
+func Setup(circuit *CRVerifierCircuit, id string) (constraint.ConstraintSystem, groth16.ProvingKey, groth16.VerifyingKey, error) {
+	if _, err := os.Stat(KEY_STORE_PATH + id + VK_PATH); err == nil {
+		ccs, err := ReadCircuit(ecc.BLS12_381, KEY_STORE_PATH+id+CIRCUIT_PATH)
 		if err != nil {
 			return nil, nil, nil, err
 		}
-		vk, err := ReadVerifyingKey(ecc.BLS12_381, KEY_STORE_PATH+VK_PATH)
+		vk, err := ReadVerifyingKey(ecc.BLS12_381, KEY_STORE_PATH+id+VK_PATH)
 		if err != nil {
 			return nil, nil, nil, err
 		}
-		pk, err := ReadProvingKey(ecc.BLS12_381, KEY_STORE_PATH+PK_PATH)
+		pk, err := ReadProvingKey(ecc.BLS12_381, KEY_STORE_PATH+id+PK_PATH)
 		if err != nil {
 			return nil, nil, nil, err
 		}
@@ -209,15 +210,15 @@ func Setup(circuit *CRVerifierCircuit) (constraint.ConstraintSystem, groth16.Pro
 		return nil, nil, nil, err
 	}
 
-	if err := WriteCircuit(ccs, KEY_STORE_PATH+CIRCUIT_PATH); err != nil {
+	if err := WriteCircuit(ccs, KEY_STORE_PATH+id+CIRCUIT_PATH); err != nil {
 		return nil, nil, nil, err
 	}
 
-	if err := WriteVerifyingKey(vk, KEY_STORE_PATH+VK_PATH); err != nil {
+	if err := WriteVerifyingKey(vk, KEY_STORE_PATH+id+VK_PATH); err != nil {
 		return nil, nil, nil, err
 	}
 
-	if err := WriteProvingKey(pk, KEY_STORE_PATH+PK_PATH); err != nil {
+	if err := WriteProvingKey(pk, KEY_STORE_PATH+id+PK_PATH); err != nil {
 		return nil, nil, nil, err
 	}
 
