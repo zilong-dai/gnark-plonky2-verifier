@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math/big"
 	"os"
-	"sync"
 
 	"github.com/GopherJ/doge-covenant/serialize"
 	gl "github.com/cf/gnark-plonky2-verifier/goldilocks"
@@ -16,7 +15,8 @@ import (
 	"github.com/consensys/gnark-crypto/ecc/bls12-381/fr"
 	"github.com/consensys/gnark/backend/groth16"
 	groth16_bls12381 "github.com/consensys/gnark/backend/groth16/bls12-381"
-	"github.com/consensys/gnark/constraint"
+	"github.com/consensys/gnark/backend/groth16/bls12-381/mpcsetup"
+	cs "github.com/consensys/gnark/constraint/bls12-381"
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/frontend/cs/r1cs"
 )
@@ -69,16 +69,6 @@ func initKeyStorePath() {
 	}
 }
 
-var (
-	ponce          *sync.Once
-	PK             groth16.ProvingKey
-	VK             groth16.VerifyingKey
-	CS             constraint.ConstraintSystem
-	CIRCUIT_DIGEST string
-
-  cs             constraint.ConstraintSystem
-)
-
 func GenerateProof(common_circuit_data string, proof_with_public_inputs string, verifier_only_circuit_data string) (string, string) {
 	initKeyStorePath()
 	commonCircuitData := types.ReadCommonCircuitDataRaw(common_circuit_data)
@@ -127,41 +117,16 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 		panic(err)
 	}
 
-
-  needSetup := ponce == nil || CIRCUIT_DIGEST != verifierOnlyCircuitDataRaw.CircuitDigest
-	if needSetup {
-		ponce = new(sync.Once)
+	cs, err := frontend.Compile(ecc.BLS12_381.ScalarField(), r1cs.NewBuilder, &circuit)
+	if err != nil {
+		panic(err)
 	}
-	ponce.Do(func() {
-		CIRCUIT_DIGEST = verifierOnlyCircuitDataRaw.CircuitDigest
-    CS, err := frontend.Compile(ecc.BLS12_381.ScalarField(), r1cs.NewBuilder, &circuit)
-    if err != nil {
-      panic(err)
-    }
-		PK, VK, err = groth16.Setup(CS)
-		if err != nil {
-			panic(err)
-		}
-	})
-
-  if needSetup {
-    cs = CS // copy the global setup
-  } else {
-    cs, err = frontend.Compile(ecc.BLS12_381.ScalarField(), r1cs.NewBuilder, &circuit)
-    if err != nil {
-      panic(err)
-    }
-  }
-
-	if err := WriteVerifyingKey(VK, KEY_STORE_PATH+VK_PATH); err != nil {
+	pk, vk := Setup(&circuit)
+	if err != nil {
 		panic(err)
 	}
 
-	if err := WriteProvingKey(PK, KEY_STORE_PATH+PK_PATH); err != nil {
-		panic(err)
-	}
-
-	proof, err := groth16.Prove(cs, PK, witness)
+	proof, err := groth16.Prove(cs, pk, witness)
 	if err != nil {
 		panic(err)
 	}
@@ -171,11 +136,7 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 		panic(err)
 	}
 
-	if err := WritePublicInputs(publicWitness, KEY_STORE_PATH+WITNESS_PATH); err != nil {
-		panic(err)
-	}
-
-	err = groth16.Verify(proof, VK, publicWitness)
+	err = groth16.Verify(proof, vk, publicWitness)
 	if err != nil {
 		panic(err)
 	}
@@ -194,7 +155,7 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 	}
 
 	var g16VerifyingKey = G16VerifyingKey{
-		VK: VK,
+		VK: vk,
 	}
 
 	vk_bytes, err := json.Marshal(g16VerifyingKey)
@@ -223,4 +184,55 @@ func VerifyProof(proofString string, vkString string) string {
 		return "false"
 	}
 	return "true"
+}
+
+func Setup(circuit *CRVerifierCircuit) (groth16.ProvingKey, groth16.VerifyingKey) {
+	if _, err := os.Stat(KEY_STORE_PATH + VK_PATH); err == nil {
+		vk, err := ReadVerifyingKey(ecc.BLS12_381, KEY_STORE_PATH+VK_PATH)
+		if err != nil {
+			panic(err)
+		}
+		pk, err := ReadProvingKey(ecc.BLS12_381, KEY_STORE_PATH+PK_PATH)
+		if err != nil {
+			panic(err)
+		}
+		return pk, vk
+	}
+
+	const (
+		nContributionsPhase1 = 3
+		nContributionsPhase2 = 3
+		power                = 9
+	)
+
+	srs1 := mpcsetup.InitPhase1(power)
+
+	for i := 1; i < nContributionsPhase1; i++ {
+		srs1.Contribute()
+	}
+
+	ccs, err := frontend.Compile(ecc.BLS12_381.ScalarField(), r1cs.NewBuilder, circuit)
+	if err != nil {
+		panic(err)
+	}
+
+	var evals mpcsetup.Phase2Evaluations
+	r1cs := ccs.(*cs.R1CS)
+
+	srs2, evals := mpcsetup.InitPhase2(r1cs, &srs1)
+	for i := 1; i < nContributionsPhase2; i++ {
+		srs2.Contribute()
+	}
+
+	pk, vk := mpcsetup.ExtractKeys(&srs1, &srs2, &evals, ccs.GetNbConstraints())
+
+	if err := WriteVerifyingKey(&vk, KEY_STORE_PATH+VK_PATH); err != nil {
+		panic(err)
+	}
+
+	if err := WriteProvingKey(&pk, KEY_STORE_PATH+PK_PATH); err != nil {
+		panic(err)
+	}
+
+	return &pk, &vk
 }
