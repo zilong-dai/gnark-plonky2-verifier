@@ -45,20 +45,18 @@ func (c *CRVerifierCircuit) Define(api frontend.API) error {
 	blockStateHashAcc := frontend.Variable(0)
 	sighashAcc := frontend.Variable(0)
 	for i := 255; i >= 0; i-- {
-    api.Println("blockStateHash[", i, "]: ", c.OriginalPublicInputs[i].Limb)
-    blockStateHashAcc = api.Mul(blockStateHashAcc, two)
+		blockStateHashAcc = api.Mul(blockStateHashAcc, two)
 		blockStateHashAcc = api.Add(blockStateHashAcc, c.OriginalPublicInputs[i].Limb)
 	}
 	for i := 511; i >= 256; i-- {
-    api.Println("sighash[", i - 256, "]: ", c.OriginalPublicInputs[i].Limb)
-    sighashAcc = api.Mul(sighashAcc, two)
+		sighashAcc = api.Mul(sighashAcc, two)
 		sighashAcc = api.Add(sighashAcc, c.OriginalPublicInputs[i].Limb)
 	}
 
-  api.Println("PublicInputs[0]", c.PublicInputs[0])
-  api.Println("blockStateHashAcc", blockStateHashAcc)
-  api.Println("PublicInputs[1]", c.PublicInputs[1])
-  api.Println("sighashAcc", sighashAcc)
+	api.Println("PublicInputs[0]", c.PublicInputs[0])
+	api.Println("blockStateHashAcc", blockStateHashAcc)
+	api.Println("PublicInputs[1]", c.PublicInputs[1])
+	api.Println("sighashAcc", sighashAcc)
 	api.AssertIsEqual(c.PublicInputs[0], blockStateHashAcc)
 	api.AssertIsEqual(c.PublicInputs[1], sighashAcc)
 
@@ -67,17 +65,17 @@ func (c *CRVerifierCircuit) Define(api frontend.API) error {
 	return nil
 }
 
-func initKeyStorePath(id string) {
-	_, err := os.Stat(KEY_STORE_PATH + id)
+func initKeyStorePath(keystore_path string) {
+	_, err := os.Stat(keystore_path)
 	if err != nil {
 		if os.IsNotExist(err) {
-			os.MkdirAll(KEY_STORE_PATH + id, os.ModePerm)
+			os.MkdirAll(keystore_path, os.ModePerm)
 		}
 	}
 }
 
-func GenerateProof(common_circuit_data string, proof_with_public_inputs string, verifier_only_circuit_data string, id string) (string, string) {
-	initKeyStorePath(id)
+func GenerateProof(common_circuit_data string, proof_with_public_inputs string, verifier_only_circuit_data string, keystore_path string) (string, string) {
+	initKeyStorePath(keystore_path)
 
 	commonCircuitData := types.ReadCommonCircuitDataRaw(common_circuit_data)
 
@@ -126,7 +124,7 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 		panic(err)
 	}
 
-	cs, pk, vk, err := Setup(&circuit, id)
+	cs, pk, vk, err := Setup(&circuit, keystore_path)
 	if err != nil {
 		panic(err)
 	}
@@ -191,17 +189,17 @@ func VerifyProof(proofString string, vkString string) string {
 	return "true"
 }
 
-func Setup(circuit *CRVerifierCircuit, id string) (constraint.ConstraintSystem, groth16.ProvingKey, groth16.VerifyingKey, error) {
-	if _, err := os.Stat(KEY_STORE_PATH + id + VK_PATH); err == nil {
-		ccs, err := ReadCircuit(ecc.BLS12_381, KEY_STORE_PATH+id+CIRCUIT_PATH)
+func Setup(circuit *CRVerifierCircuit, keystore_path string) (constraint.ConstraintSystem, groth16.ProvingKey, groth16.VerifyingKey, error) {
+	if _, err := os.Stat(keystore_path + VK_PATH); err == nil {
+		ccs, err := ReadCircuit(ecc.BLS12_381, keystore_path+CIRCUIT_PATH)
 		if err != nil {
 			return nil, nil, nil, err
 		}
-		vk, err := ReadVerifyingKey(ecc.BLS12_381, KEY_STORE_PATH+id+VK_PATH)
+		vk, err := ReadVerifyingKey(ecc.BLS12_381, keystore_path+VK_PATH)
 		if err != nil {
 			return nil, nil, nil, err
 		}
-		pk, err := ReadProvingKey(ecc.BLS12_381, KEY_STORE_PATH+id+PK_PATH)
+		pk, err := ReadProvingKey(ecc.BLS12_381, keystore_path+PK_PATH)
 		if err != nil {
 			return nil, nil, nil, err
 		}
@@ -218,15 +216,15 @@ func Setup(circuit *CRVerifierCircuit, id string) (constraint.ConstraintSystem, 
 		return nil, nil, nil, err
 	}
 
-	if err := WriteCircuit(ccs, KEY_STORE_PATH+id+CIRCUIT_PATH); err != nil {
+	if err := WriteCircuit(ccs, keystore_path+CIRCUIT_PATH); err != nil {
 		return nil, nil, nil, err
 	}
 
-	if err := WriteVerifyingKey(vk, KEY_STORE_PATH+id+VK_PATH); err != nil {
+	if err := WriteVerifyingKey(vk, keystore_path+VK_PATH); err != nil {
 		return nil, nil, nil, err
 	}
 
-	if err := WriteProvingKey(pk, KEY_STORE_PATH+id+PK_PATH); err != nil {
+	if err := WriteProvingKey(pk, keystore_path+PK_PATH); err != nil {
 		return nil, nil, nil, err
 	}
 

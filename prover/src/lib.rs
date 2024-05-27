@@ -27,6 +27,7 @@ pub fn wrap_plonky2_proof(
     save_wrapped_data_path: Option<&str>,
     id: &str,
 ) -> anyhow::Result<(String, String)> {
+    circuit_data.verify(proof.clone())?;
     let wrapper_builder = WrapperBuilder::<DefaultParameters, D>::new();
     let mut circuit = wrapper_builder.build();
     circuit.data = circuit_data;

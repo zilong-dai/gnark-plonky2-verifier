@@ -12,8 +12,6 @@ import (
 	"github.com/zilong-dai/gnark/backend/witness"
 )
 
-const KEY_STORE_PATH = "/tmp/groth16-keystore"
-
 var CIRCUIT_PATH string = "circuit_groth16.bin"
 var VK_PATH string = "vk_groth16.bin"
 var PK_PATH string = "pk_groth16.bin"

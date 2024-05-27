@@ -1,7 +1,6 @@
 package verifier_test
 
 import (
-	"fmt"
 	"math/big"
 	"testing"
 
@@ -39,20 +38,18 @@ func (c *CRVerifierCircuit) Define(api frontend.API) error {
 	blockStateHashAcc := frontend.Variable(0)
 	sighashAcc := frontend.Variable(0)
 	for i := 255; i >= 0; i-- {
-    api.Println("blockStateHash[", i, "]: ", c.OriginalPublicInputs[i].Limb)
-    blockStateHashAcc = api.Mul(blockStateHashAcc, two)
+		blockStateHashAcc = api.Mul(blockStateHashAcc, two)
 		blockStateHashAcc = api.Add(blockStateHashAcc, c.OriginalPublicInputs[i].Limb)
 	}
 	for i := 511; i >= 256; i-- {
-    api.Println("sighash[", i - 256, "]: ", c.OriginalPublicInputs[i].Limb)
-    sighashAcc = api.Mul(sighashAcc, two)
+		sighashAcc = api.Mul(sighashAcc, two)
 		sighashAcc = api.Add(sighashAcc, c.OriginalPublicInputs[i].Limb)
 	}
 
-  api.Println("PublicInputs[0]", c.PublicInputs[0])
-  api.Println("PublicInputs[1]", c.PublicInputs[1])
-  api.Println("blockStateHashAcc", blockStateHashAcc)
-  api.Println("sighashAcc", sighashAcc)
+	api.Println("PublicInputs[0]", c.PublicInputs[0])
+	api.Println("blockStateHashAcc", blockStateHashAcc)
+	api.Println("PublicInputs[1]", c.PublicInputs[1])
+	api.Println("sighashAcc", sighashAcc)
 	api.AssertIsEqual(c.PublicInputs[0], blockStateHashAcc)
 	api.AssertIsEqual(c.PublicInputs[1], sighashAcc)
 
@@ -61,49 +58,48 @@ func (c *CRVerifierCircuit) Define(api frontend.API) error {
 	return nil
 }
 
-
 func TestStepVerifier(t *testing.T) {
 	assert := test.NewAssert(t)
 
 	testCase := func() {
-		path := "/tmp/plonky2_proof"
+		path := "/tmp/plonky2_proof/2"
 		commonCircuitData := types.ReadCommonCircuitData(path + "/common_circuit_data.json")
 
-    rawProofWithPis := types.ReadProofWithPublicInputs(path + "/proof_with_public_inputs.json")
+		rawProofWithPis := types.ReadProofWithPublicInputs(path + "/proof_with_public_inputs.json")
 		proofWithPis := variables.DeserializeProofWithPublicInputs(rawProofWithPis)
-    rawVerifierOnlyCircuitData := types.ReadVerifierOnlyCircuitData(path + "/verifier_only_circuit_data.json")
+		rawVerifierOnlyCircuitData := types.ReadVerifierOnlyCircuitData(path + "/verifier_only_circuit_data.json")
 		verifierOnlyCircuitData := variables.DeserializeVerifierOnlyCircuitData(rawVerifierOnlyCircuitData)
 
-	two := big.NewInt(2)
+		two := big.NewInt(2)
 
-	blockStateHashAcc := big.NewInt(0)
-	sighashAcc := big.NewInt(0)
-	for i := 255; i >= 0; i-- {
-		blockStateHashAcc = new(big.Int).Mul(blockStateHashAcc, two)
-		blockStateHashAcc = new(big.Int).Add(blockStateHashAcc, new(big.Int).SetUint64(rawProofWithPis.PublicInputs[i]))
-	}
-	for i := 511; i >= 256; i-- {
-		sighashAcc = new(big.Int).Mul(sighashAcc, two)
-		sighashAcc = new(big.Int).Add(sighashAcc, new(big.Int).SetUint64(rawProofWithPis.PublicInputs[i]))
-	}
-	blockStateHash := frontend.Variable(blockStateHashAcc)
-	sighash := frontend.Variable(sighashAcc)
+		blockStateHashAcc := big.NewInt(0)
+		sighashAcc := big.NewInt(0)
+		for i := 255; i >= 0; i-- {
+			blockStateHashAcc = new(big.Int).Mul(blockStateHashAcc, two)
+			blockStateHashAcc = new(big.Int).Add(blockStateHashAcc, new(big.Int).SetUint64(rawProofWithPis.PublicInputs[i]))
+		}
+		for i := 511; i >= 256; i-- {
+			sighashAcc = new(big.Int).Mul(sighashAcc, two)
+			sighashAcc = new(big.Int).Add(sighashAcc, new(big.Int).SetUint64(rawProofWithPis.PublicInputs[i]))
+		}
+		blockStateHash := frontend.Variable(blockStateHashAcc)
+		sighash := frontend.Variable(sighashAcc)
 
-	circuit := CRVerifierCircuit{
-		PublicInputs:            make([]frontend.Variable, 2),
-		Proof:                   proofWithPis.Proof,
-		OriginalPublicInputs:    proofWithPis.PublicInputs,
-		VerifierOnlyCircuitData: verifierOnlyCircuitData,
-		CommonCircuitData:       commonCircuitData,
-	}
+		circuit := CRVerifierCircuit{
+			PublicInputs:            make([]frontend.Variable, 2),
+			Proof:                   proofWithPis.Proof,
+			OriginalPublicInputs:    proofWithPis.PublicInputs,
+			VerifierOnlyCircuitData: verifierOnlyCircuitData,
+			CommonCircuitData:       commonCircuitData,
+		}
 
-	witness := CRVerifierCircuit{
-		PublicInputs:            []frontend.Variable{blockStateHash, sighash},
-		Proof:                   circuit.Proof,
-		OriginalPublicInputs:    circuit.OriginalPublicInputs,
-		VerifierOnlyCircuitData: circuit.VerifierOnlyCircuitData,
-		CommonCircuitData:       commonCircuitData,
-	}
+		witness := CRVerifierCircuit{
+			PublicInputs:            []frontend.Variable{blockStateHash, sighash},
+			Proof:                   circuit.Proof,
+			OriginalPublicInputs:    circuit.OriginalPublicInputs,
+			VerifierOnlyCircuitData: circuit.VerifierOnlyCircuitData,
+			CommonCircuitData:       commonCircuitData,
+		}
 
 		err := test.IsSolved(&circuit, &witness, ecc.BLS12_381.ScalarField())
 		assert.NoError(err)

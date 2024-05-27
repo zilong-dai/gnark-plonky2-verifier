@@ -20,18 +20,18 @@ pub fn generate_groth16_proof(
     common_circuit_data: &str,
     proof_with_public_inputs: &str,
     verifier_only_circuit_data: &str,
-    id: &str,
+    keystore_path: &str,
 ) -> (String, String) {
     let c_common_circuit_data = CString::new(common_circuit_data).unwrap();
     let c_proof_with_public_inputs = CString::new(proof_with_public_inputs).unwrap();
     let c_verifier_only_circuit_data = CString::new(verifier_only_circuit_data).unwrap();
-    let c_id = CString::new(id).unwrap();
+    let c_keystore_path = CString::new(keystore_path).unwrap();
     unsafe {
         let c_proof_with_vk = bindings::GenerateGroth16Proof(
             c_common_circuit_data.into_raw(),
             c_proof_with_public_inputs.into_raw(),
             c_verifier_only_circuit_data.into_raw(),
-            c_id.into_raw(),
+            c_keystore_path.into_raw(),
         );
         let proof = CStr::from_ptr((*c_proof_with_vk).proof).to_string_lossy().into_owned();
         let vk = CStr::from_ptr((*c_proof_with_vk).vk).to_string_lossy().into_owned();
@@ -50,7 +50,7 @@ mod tests {
             &std::fs::read_to_string("../testdata/common_circuit_data.json").unwrap(),
             &std::fs::read_to_string("../testdata/proof_with_public_inputs.json").unwrap(),
             &std::fs::read_to_string("../testdata/verifier_only_circuit_data.json").unwrap(),
-            "/0/"
+            "/tmp/groth16-keystore/0/"
         );
     }
 }
