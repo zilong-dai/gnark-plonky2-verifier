@@ -511,8 +511,8 @@ func (f *Chip) verifyQueryRound(
 	f.api.Println(finalPolyEval[0].Limb)
 	f.api.Println(finalPolyEval[1].Limb)
 
-	// f.gl.AssertIsEqual(oldEval[0], finalPolyEval[0])
-	// f.gl.AssertIsEqual(oldEval[1], finalPolyEval[1])
+	f.gl.AssertIsEqual(oldEval[0], finalPolyEval[0])
+	f.gl.AssertIsEqual(oldEval[1], finalPolyEval[1])
 }
 
 func (f *Chip) VerifyFriProof(

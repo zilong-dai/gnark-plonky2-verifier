@@ -15,13 +15,13 @@ import (
 
 type CRVerifierCircuit struct {
 	PublicInputs            []frontend.Variable               `gnark:",public"`
-	Proof                   variables.Proof                   `gnark:"-"`
-	VerifierOnlyCircuitData variables.VerifierOnlyCircuitData `gnark:"-"`
+	Proof                   variables.Proof                   `gnark:",secret"`
+	VerifierOnlyCircuitData variables.VerifierOnlyCircuitData `gnark:",secret"`
 
-	OriginalPublicInputs []gl.Variable `gnark:"_"`
+	OriginalPublicInputs []gl.Variable `gnark:",secret"`
 
 	// This is configuration for the circuit, it is a constant not a variable
-	CommonCircuitData types.CommonCircuitData
+	CommonCircuitData types.CommonCircuitData `gnark:",secret"`
 }
 
 func (c *CRVerifierCircuit) Define(api frontend.API) error {
@@ -62,7 +62,7 @@ func TestStepVerifier(t *testing.T) {
 	assert := test.NewAssert(t)
 
 	testCase := func() {
-		path := "/tmp/plonky2_proof/2"
+		path := "/tmp/plonky2_proof/0"
 		commonCircuitData := types.ReadCommonCircuitData(path + "/common_circuit_data.json")
 
 		rawProofWithPis := types.ReadProofWithPublicInputs(path + "/proof_with_public_inputs.json")

@@ -36,7 +36,7 @@ func VerifyGroth16Proof(proofString *C.char, vkString *C.char) *C.char {
 }
 
 func main() {
-  path := "/tmp/plonky2_proof/2"
+  path := "/tmp/plonky2_proof/0"
 
 	common_circuit_data, _ := os.ReadFile(path + "/common_circuit_data.json")
 

@@ -53,18 +53,31 @@ func (c *VerifierChip) GetChallenges(
 
 	var circuitDigest = verifierData.CircuitDigest
 
+  c.api.Println("circuitDigest", circuitDigest)
 	challenger.ObserveBLS12381Hash(circuitDigest)
+  c.api.Println("hash", publicInputsHash)
 	challenger.ObserveHash(publicInputsHash)
+  c.api.Println("cap")
 	challenger.ObserveCap(proof.WiresCap)
+	for i := 0; i < len(proof.WiresCap); i++ {
+    c.api.Println("wires cap", proof.WiresCap[i])
+  }
 	plonkBetas := challenger.GetNChallenges(numChallenges)
+  c.api.Println("get plonk betas challenges", plonkBetas[0])
 	plonkGammas := challenger.GetNChallenges(numChallenges)
+  c.api.Println("get plonk gammas challenges", plonkGammas[0])
 
+  c.api.Println("cap")
 	challenger.ObserveCap(proof.PlonkZsPartialProductsCap)
 	plonkAlphas := challenger.GetNChallenges(numChallenges)
+  c.api.Println("get plonk alpha challenges", plonkAlphas[0])
 
+  c.api.Println("cap")
 	challenger.ObserveCap(proof.QuotientPolysCap)
 	plonkZeta := challenger.GetExtensionChallenge()
+  c.api.Println("get plonk zeta:", plonkZeta[0])
 
+  c.api.Println("observe openings")
 	challenger.ObserveOpenings(c.friChip.ToOpenings(proof.Openings))
 
 	return variables.ProofChallenges{
@@ -149,6 +162,7 @@ func (c *VerifierChip) Verify(
 
 	// Generate the parts of the witness that is for the plonky2 proof input
 	publicInputsHash := c.GetPublicInputsHash(publicInputs)
+  c.api.Println("publicInputsHash", publicInputsHash)
 	proofChallenges := c.GetChallenges(proof, publicInputsHash, verifierData)
 
 	// c.plonkChip.Verify(proofChallenges, proof.Openings, publicInputsHash)

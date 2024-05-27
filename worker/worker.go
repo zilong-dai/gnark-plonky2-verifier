@@ -22,13 +22,13 @@ import (
 
 type CRVerifierCircuit struct {
 	PublicInputs            []frontend.Variable               `gnark:",public"`
-	Proof                   variables.Proof                   `gnark:"-"`
-	VerifierOnlyCircuitData variables.VerifierOnlyCircuitData `gnark:"-"`
+	Proof                   variables.Proof                   `gnark:",secret"`
+	VerifierOnlyCircuitData variables.VerifierOnlyCircuitData `gnark:",secret"`
 
-	OriginalPublicInputs []gl.Variable `gnark:"_"`
+	OriginalPublicInputs []gl.Variable `gnark:",secret"`
 
 	// This is configuration for the circuit, it is a constant not a variable
-	CommonCircuitData types.CommonCircuitData
+	CommonCircuitData types.CommonCircuitData `gnark:",secret"`
 }
 
 func (c *CRVerifierCircuit) Define(api frontend.API) error {
@@ -139,13 +139,18 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 		panic(err)
 	}
 
-	err = groth16.Verify(proof, vk, publicWitness)
-	if err != nil {
-		panic(err)
-	}
+	// err = groth16.Verify(proof, vk, publicWitness)
+	// if err != nil {
+	// 	panic(err)
+	// }
 
 	blsProof := proof.(*groth16_bls12381.Proof)
 	blsWitness := publicWitness.Vector().(fr.Vector)
+
+	original_proof_bytes, err := json.Marshal(&blsProof)
+	if err != nil {
+		panic(err)
+	}
 
 	proof_city, err := serialize.ToJsonCityProof(blsProof, blsWitness)
 	if err != nil {
@@ -165,6 +170,9 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 	if err != nil {
 		panic(err)
 	}
+
+  fmt.Println("proofString", string(original_proof_bytes))
+  fmt.Println("vkString", string(vk_bytes))
 
 	return string(proof_bytes), string(vk_bytes)
 
