@@ -147,7 +147,10 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 	blsProof := proof.(*groth16_bls12381.Proof)
 	blsWitness := publicWitness.Vector().(fr.Vector)
 
-	original_proof_bytes, err := json.Marshal(&blsProof)
+	original_proof_bytes, err := json.Marshal(&G16ProofWithPublicInputs{
+		Proof:        blsProof,
+		PublicInputs: publicWitness,
+	})
 	if err != nil {
 		panic(err)
 	}
