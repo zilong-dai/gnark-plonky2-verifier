@@ -5,7 +5,7 @@ go 1.21.4
 toolchain go1.22.3
 
 require (
-	github.com/GopherJ/doge-covenant v0.0.0-20240528032232-45270a13331f
+	github.com/GopherJ/doge-covenant v0.0.0-20240528041845-435d3d7c1391
 	github.com/GopherJ/gnark-ignition-verifier v0.0.0-20240415111943-ecb54c32e4bb
 	github.com/consensys/gnark-crypto v0.12.2-0.20240215234832-d72fcb379d3e
 	github.com/zilong-dai/gnark v0.0.0-20240517091131-0ad4d7b387da
