@@ -145,6 +145,7 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 	// }
 
 	blsProof := proof.(*groth16_bls12381.Proof)
+	blsVk := vk.(*groth16_bls12381.VerifyingKey)
 	blsWitness := publicWitness.Vector().(fr.Vector)
 
 	original_proof_bytes, err := json.Marshal(&G16ProofWithPublicInputs{
@@ -154,28 +155,32 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 	if err != nil {
 		panic(err)
 	}
+	var g16VerifyingKey = G16VerifyingKey{
+		VK: vk,
+	}
+	original_vk_bytes, err := json.Marshal(g16VerifyingKey)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("proofString", string(original_proof_bytes))
+	fmt.Println("vkString", string(original_vk_bytes))
 
 	proof_city, err := serialize.ToJsonCityProof(blsProof, blsWitness)
 	if err != nil {
 		panic(err)
 	}
-
 	proof_bytes, err := json.Marshal(&proof_city)
 	if err != nil {
 		panic(err)
 	}
-
-	var g16VerifyingKey = G16VerifyingKey{
-		VK: vk,
-	}
-
-	vk_bytes, err := json.Marshal(g16VerifyingKey)
+	vk_city, err := serialize.ToJsonCityVK(blsVk)
 	if err != nil {
 		panic(err)
 	}
-
-  fmt.Println("proofString", string(original_proof_bytes))
-  fmt.Println("vkString", string(vk_bytes))
+	vk_bytes, err := json.Marshal(&vk_city)
+	if err != nil {
+		panic(err)
+	}
 
 	return string(proof_bytes), string(vk_bytes)
 

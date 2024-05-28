@@ -4,6 +4,8 @@ github.com/GopherJ/doge-covenant v0.0.0-20240524164836-b1aad1ba42f5 h1:lDJ9SJbww
 github.com/GopherJ/doge-covenant v0.0.0-20240524164836-b1aad1ba42f5/go.mod h1:h3cwGmCKsZRpkNaIWTNxXc8QGEKXTXCjVlU6EOCqQrw=
 github.com/GopherJ/doge-covenant v0.0.0-20240524165351-f89992cb5da6 h1:Zgz0aLeq5Ggw2fBS1nZ5H/mPJ/2sHYZm3HEvbSZt+lA=
 github.com/GopherJ/doge-covenant v0.0.0-20240524165351-f89992cb5da6/go.mod h1:WCSRRrKwtTdcc5HzzVX4lwbHl0RwvOFUz+ddkAblIz4=
+github.com/GopherJ/doge-covenant v0.0.0-20240528032232-45270a13331f h1:nCy7fvSorhyj8yuES8/1MULSeQCDwqggSg075W1t9A8=
+github.com/GopherJ/doge-covenant v0.0.0-20240528032232-45270a13331f/go.mod h1:WCSRRrKwtTdcc5HzzVX4lwbHl0RwvOFUz+ddkAblIz4=
 github.com/GopherJ/gnark-ignition-verifier v0.0.0-20240415111943-ecb54c32e4bb h1:stZGm4c/Pn9yda+rhWKQl81EGgrIUuKf72to476JqFc=
 github.com/GopherJ/gnark-ignition-verifier v0.0.0-20240415111943-ecb54c32e4bb/go.mod h1:5OGlD6B9ePz0Vf3JHK0/f9SYTmvumOSEQh16KgYa+KE=
 github.com/bits-and-blooms/bitset v1.8.0 h1:FD+XqgOZDUxxZ8hzoBFuV9+cGWY9CslN6d5MS5JVb4c=

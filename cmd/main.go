@@ -49,5 +49,7 @@ func main() {
 
 	verifier_only_circuit_data, _ := os.ReadFile(path + "/verifier_only_circuit_data.json")
 
-	worker.GenerateProof(string(common_circuit_data), string(proof_with_public_inputs), string(verifier_only_circuit_data), "/tmp/groth16-keystore/0/")
+  proof_city, vk_city := worker.GenerateProof(string(common_circuit_data), string(proof_with_public_inputs), string(verifier_only_circuit_data), "/tmp/groth16-keystore/0/")
+  fmt.Println("proof city", proof_city)
+  fmt.Println("vk city", vk_city)
 }
