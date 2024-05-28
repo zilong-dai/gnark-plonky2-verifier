@@ -113,6 +113,8 @@ mod tests {
         println!("proof {}", g16_proof);
         println!("vk {}", g16_vk);
 
+        println!("verify {}", gnark_plonky2_verifier_ffi::verify_groth16_proof(&g16_proof, &g16_vk));
+
         Ok(())
     }
 

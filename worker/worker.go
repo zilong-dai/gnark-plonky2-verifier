@@ -187,16 +187,24 @@ func GenerateProof(common_circuit_data string, proof_with_public_inputs string, 
 }
 
 func VerifyProof(proofString string, vkString string) string {
-	g16ProofWithPublicInputs := NewG16ProofWithPublicInputs()
+	var cityProof serialize.CityGroth16ProofData
+	var cityVk serialize.CityGroth16VerifierData
 
-	if err := json.Unmarshal([]byte(proofString), g16ProofWithPublicInputs); err != nil {
-		panic(err)
+	if err := json.Unmarshal([]byte(proofString), &cityProof); err != nil {
+		return "false"
 	}
 
-	g16VerifyingKey := NewG16VerifyingKey()
+	g16ProofWithPublicInputs, err := FromCityProof(cityProof)
+	if err != nil {
+		return "false"
+	}
 
-	if err := json.Unmarshal([]byte(vkString), g16VerifyingKey); err != nil {
-		panic(err)
+	if err := json.Unmarshal([]byte(vkString), &cityVk); err != nil {
+		return "false"
+	}
+	g16VerifyingKey, err := FromCityVk(cityVk)
+	if err != nil {
+		return "false"
 	}
 
 	if err := groth16.Verify(g16ProofWithPublicInputs.Proof, g16VerifyingKey.VK, g16ProofWithPublicInputs.PublicInputs); err != nil {

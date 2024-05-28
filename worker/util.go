@@ -2,20 +2,25 @@ package worker
 
 import (
 	"crypto/sha256"
+	"encoding/hex"
+	"errors"
 	"fmt"
+	"math/big"
 	"os"
 	"path/filepath"
 
 	"github.com/consensys/gnark-crypto/ecc"
+	curve "github.com/consensys/gnark-crypto/ecc/bls12-381"
+	"github.com/consensys/gnark-crypto/ecc/bls12-381/fp"
 	"github.com/zilong-dai/gnark/backend/groth16"
 	"github.com/zilong-dai/gnark/backend/witness"
 	"github.com/zilong-dai/gnark/constraint"
 )
 
 func Sha256(data []byte) {
-  h := sha256.New()
-  h.Write([]byte(data))
-  h.Sum(nil)
+	h := sha256.New()
+	h.Write([]byte(data))
+	h.Sum(nil)
 }
 
 func WriteProof(proof groth16.Proof, path string) error {
@@ -230,4 +235,101 @@ func CheckVKeysExist(path string) bool {
 	}
 
 	return true
+}
+
+func DeSerializeG1MCL(g1s string) (*curve.G1Affine, error) {
+	g1Bytes, err := hex.DecodeString(reverseHexString(g1s))
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode g1 hex string: %w", err)
+	}
+
+	oddFlag := false
+	if g1Bytes[0]&0xe0 == 0x80 {
+		oddFlag = true
+	}
+
+	g1Bytes[0] &= 0x7f
+
+	g1 := new(curve.G1Affine)
+
+	var X, YSquared, Y, bCurveCoeff fp.Element
+
+	X.SetBytes(g1Bytes[:])
+
+	bCurveCoeff.SetUint64(4)
+
+	YSquared.Square(&X).Mul(&YSquared, &X)
+	YSquared.Add(&YSquared, &bCurveCoeff)
+	if Y.Sqrt(&YSquared) == nil {
+		return nil, errors.New("invalid compressed coordinate: square root doesn't exist")
+	}
+
+	if oddFlag != isOddFp(&Y) {
+		Y.Neg(&Y)
+	}
+
+	g1.X = X
+	g1.Y = Y
+
+	return g1, nil
+}
+
+func DeSerializeG2MCL(g2a0, g2a1 string) (*curve.G2Affine, error) {
+	g2a0Bytes, err := hex.DecodeString(reverseHexString(g2a0))
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode g2 hex string: %w", err)
+	}
+	g2a1Bytes, err := hex.DecodeString(reverseHexString(g2a1))
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode g2 hex string: %w", err)
+	}
+
+	oddFlag := false
+	if g2a1Bytes[0]&0xe0 == 0x80 {
+		oddFlag = true
+	}
+
+	g2a1Bytes[0] &= 0x7f
+
+	g2 := new(curve.G2Affine)
+
+	g2.X.A0.SetBytes(g2a0Bytes)
+	g2.X.A1.SetBytes(g2a1Bytes)
+
+	var YSquared, Y, bTwistCurveCoeff curve.E2
+	var bCurveCoeff fp.Element
+	var twist curve.E2
+
+	bCurveCoeff.SetUint64(4)
+	// M-twist
+	twist.A0.SetUint64(1)
+	twist.A1.SetUint64(1)
+	bTwistCurveCoeff.MulByElement(&twist, &bCurveCoeff)
+
+	YSquared.Square(&g2.X).Mul(&YSquared, &g2.X)
+	YSquared.Add(&YSquared, &bTwistCurveCoeff)
+	if YSquared.Legendre() == -1 {
+		return nil, errors.New("invalid compressed coordinate: square root doesn't exist")
+	}
+	Y.Sqrt(&YSquared)
+
+	if oddFlag != isOddFp(&Y.A0) {
+		Y.Neg(&Y)
+	}
+	g2.Y = Y
+
+	return g2, nil
+}
+
+func isOddFp(x *fp.Element) bool {
+	return x.BigInt(big.NewInt(0)).Bit(0) == 1
+}
+
+func reverseHexString(hexStr string) string {
+	reversed := make([]byte, len(hexStr))
+	for i := 0; i < len(hexStr); i += 2 {
+		reversed[i] = hexStr[len(hexStr)-i-2]
+		reversed[i+1] = hexStr[len(hexStr)-i-1]
+	}
+	return string(reversed)
 }
